@@ -4,7 +4,7 @@
 
 ## 旅程表を見る
 
-**→ https://USERNAME.github.io/okinawa-2026/**
+**→ https://sutadonman.github.io/okinawa-2026/**
 
 スマホでそのまま開けます。各スポットに Google マップの埋め込み地図とピンのリンクが付いています。
 
@@ -60,7 +60,7 @@
 
 `index.html` に `noindex` を入れてあるため、検索エンジンには載らない。URL を知っている人だけが到達できる状態。
 
-さらに強くしたい場合は、`USERNAME.github.io` リポジトリの `robots.txt` に以下を追記する。プロジェクトページのサブパスに置いた `robots.txt` はクローラーに読まれないので、ドメイン直下に置く必要がある。
+さらに強くしたい場合は、`sutadonman.github.io` リポジトリの `robots.txt` に以下を追記する。プロジェクトページのサブパスに置いた `robots.txt` はクローラーに読まれないので、ドメイン直下に置く必要がある。
 
 ```
 User-agent: *
