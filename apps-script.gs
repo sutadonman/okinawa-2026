@@ -97,6 +97,10 @@ function rowOfId_(sh, id) {
   return -1;
 }
 
+// 展開に失敗した理由を残す。doGet?debug=... で外から読めるようにして、
+// 「黙って解決されない」状態を追えるようにする
+var EXPAND_NOTE = '';
+
 /**
  * 短縮URL（maps.app.goo.gl）を実URLに展開する。
  * ブラウザからは転送先を辿れないので、サーバー側であるここで解決してしまう。
@@ -105,23 +109,43 @@ function rowOfId_(sh, id) {
 function expandUrl_(url) {
   if (!/^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(url)) return null;
   var cur = url;
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 6; i++) {
     var res;
     try {
-      res = UrlFetchApp.fetch(cur, { followRedirects: false, muteHttpExceptions: true });
+      res = UrlFetchApp.fetch(cur, {
+        followRedirects: false,
+        muteHttpExceptions: true,
+        // UA を伏せると転送ではなく案内ページを返されることがあるため、ブラウザを名乗る
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+      });
     } catch (e) {
+      EXPAND_NOTE = 'fetch例外: ' + e;
       return null;
     }
+
     var code = res.getResponseCode();
-    if (code < 300 || code >= 400) break;
-    var h = res.getAllHeaders();
-    var loc = h['Location'] || h['location'];
-    if (loc instanceof Array) loc = loc[0];
-    if (!loc) break;
-    cur = String(loc);
-    if (/\/maps\/place\/|!3d-?\d/.test(cur)) return cur;
+
+    if (code >= 300 && code < 400) {
+      var h = res.getAllHeaders();
+      var loc = h['Location'] || h['location'];
+      if (loc instanceof Array) loc = loc[0];
+      if (!loc) { EXPAND_NOTE = code + ' だが Location なし'; return null; }
+      cur = String(loc);
+      if (/\/maps\/place\/|!3d-?\d/.test(cur)) return cur;
+      continue;
+    }
+
+    // 200 が返る場合、本文（HTML）の中に本当の遷移先が入っている
+    var body = '';
+    try { body = res.getContentText(); } catch (e) { body = ''; }
+    var m = body.match(/https:\/\/www\.google\.com\/maps\/[^"'\\\s<>]+/);
+    if (m) return m[0].replace(/&amp;/g, '&');
+
+    EXPAND_NOTE = 'code=' + code + ' 本文冒頭=' + body.slice(0, 150);
+    return null;
   }
-  return (cur !== url) ? cur : null;
+  EXPAND_NOTE = '転送が多すぎます';
+  return null;
 }
 
 /**
@@ -190,6 +214,19 @@ function withLock_(fn) {
 /** ダッシュボードがシートを読むための入口 */
 function doGet(e) {
   var cb = (e && e.parameter) ? e.parameter.callback : null;
+
+  // 診断用：?debug=<短縮URL> で展開の結果と失敗理由をそのまま返す
+  if (e && e.parameter && e.parameter.debug) {
+    var target = e.parameter.debug;
+    EXPAND_NOTE = '';
+    var expanded = expandUrl_(target);
+    return out_({
+      ok: true, target: target, expanded: expanded,
+      parsed: expanded ? parsePlace_(expanded) : null,
+      note: EXPAND_NOTE
+    }, cb);
+  }
+
   try {
     var values = withLock_(function () {
       var sh = sheet_();
