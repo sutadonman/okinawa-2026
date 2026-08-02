@@ -40,6 +40,24 @@ function sheet_() {
 }
 
 /**
+ * 承認を取り直すための関数。エディタから手で1回実行する。
+ * 短縮URLの展開には外部URLへのアクセス権が要るが、ウェブアプリを
+ * 再デプロイしただけでは承認画面が出ないことがあるため、ここで明示的に呼ぶ。
+ * 例外を握りつぶさないので、権限が無ければそのまま実行ログに出る。
+ */
+function authorize() {
+  var res = UrlFetchApp.fetch('https://maps.app.goo.gl/JwsBq7HeYfy36uPe8', {
+    followRedirects: false,
+    muteHttpExceptions: true,
+    headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+  });
+  var h = res.getAllHeaders();
+  Logger.log('code=%s location=%s', res.getResponseCode(), h['Location'] || h['location'] || '(なし)');
+  Logger.log('シート=%s', SpreadsheetApp.openById(SHEET_ID).getName());
+  return 'OK';
+}
+
+/**
  * callback が来ていれば JSONP、無ければ素の JSON で返す。
  * ブラウザから別オリジンで読むため、GET は JSONP を使う。
  */
