@@ -190,6 +190,10 @@
   .pri{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-family:var(--font-mono)}
   .pri i{width:9px;height:9px;border-radius:2px;flex:none}
   .empty{color:var(--muted);font-size:11px}
+  .stsel{font-family:var(--font-mono);font-size:11.5px;padding:4px 6px;
+    border:1px solid var(--line);border-radius:2px;background:var(--ground);color:var(--text)}
+  tr.rejected{opacity:.45}
+  tr.rejected td.name{text-decoration:line-through}
 
   .note{font-size:12px;color:var(--muted);margin-top:10px}
   footer{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12px}
@@ -693,9 +697,10 @@
       }).join("");
 
     var noPos = recs.length - pts.length;
-    $("gnote").textContent = noPos
-      ? pts.length + "件を表示しています。座標が分からない " + noPos + "件は地図に出ていません。"
-      : pts.length + "件すべてを表示しています。";
+    var parts = [pts.length + "件を表示しています。"];
+    if(noPos) parts.push("座標が分からない " + noPos + "件は出ていません。");
+    if(REJECTED) parts.push("不採用の " + REJECTED + "件も外しています。");
+    $("gnote").textContent = parts.join("");
   }
 
   function setupGoogleMap(recs, members){
@@ -773,24 +778,30 @@
     recs.forEach(function(r){ if(members.indexOf(r.who)<0) members.push(r.who); });
     members.sort();
 
-    setupGoogleMap(recs, members);
+    // 不採用はシートには残すが、地図と集計からは外す。
+    // 一覧表だけは全件出す（そこが採否を戻す場所なので）
+    var live = recs.filter(function(r){ return r.status !== "不採用"; });
+    REJECTED = recs.length - live.length;
+
+    setupGoogleMap(live, members);
 
     // ---- tiles ----
-    var spotSet = {}; recs.forEach(function(r){ spotSet[r.spot]=1; });
-    var unresolved = recs.filter(function(r){ return !r.resolved; });
+    var spotSet = {}; live.forEach(function(r){ spotSet[r.spot]=1; });
+    var unresolved = live.filter(function(r){ return !r.resolved; });
     var tiles = [
-      ["提出", recs.length, "件"],
+      ["生きている提出", live.length, "件"],
       ["提出者", members.length, "人"],
       ["スポット", Object.keys(spotSet).length, "か所"],
-      ["場所が未解決", unresolved.length, "件"]
+      ["不採用", REJECTED, "件"]
     ];
     if(unresolved.length){
       var names = {};
       unresolved.forEach(function(r){ names[r.who+"："+r.spot]=1; });
       $("status").innerHTML = '<div class="panel warn" style="margin-bottom:30px">' +
         '<h3>場所を特定できていない提出が ' + unresolved.length + ' 件あります</h3>' +
-        '<p style="margin:0">短縮URL（maps.app.goo.gl）はブラウザから転送先を辿れないため、地図と集計に反映されていません。' +
-        '「未解決分を解決して」と伝えてもらえれば、こちらで座標を調べて反映します。</p>' +
+        '<p style="margin:0">短縮URLは受け取った時点で自動的に座標へ変換していますが、' +
+        'この分は変換に失敗しています。ページを開き直すと再試行します。' +
+        'それでも残る場合は「未解決分を解決して」と伝えてください。</p>' +
         '<p style="margin:8px 0 0"><span class="empty">' + esc(Object.keys(names).join(" / ")) + '</span></p></div>';
     }
     $("tiles").innerHTML = tiles.map(function(t){
@@ -799,11 +810,11 @@
 
     // ---- main map ----
     var counts = {};
-    recs.forEach(function(r){ if(r.muni) counts[r.muni]=(counts[r.muni]||0)+1; });
+    live.forEach(function(r){ if(r.muni) counts[r.muni]=(counts[r.muni]||0)+1; });
     var mx = 1; for(var mk in counts){ if(counts[mk]>mx) mx=counts[mk]; }
     drawMap($("map"), counts, {color:"var(--m1)", labels:true, labelMin: mx>=2 ? 2 : 1});
     var areaTotals = {"北部":0,"中部":0,"南部":0};
-    recs.forEach(function(r){ var a=areaOf(r.muni); if(areaTotals[a]!=null) areaTotals[a]++; });
+    live.forEach(function(r){ var a=areaOf(r.muni); if(areaTotals[a]!=null) areaTotals[a]++; });
     $("maplegend").innerHTML =
       '<span><i style="background:var(--m1)"></i>提出あり（丸の大きさ＝件数）</span>' +
       '<span><i style="background:var(--axis)"></i>提出なし</span>' +
@@ -818,10 +829,10 @@
     }).join("");
     members.forEach(function(m,i){
       var c = {};
-      recs.forEach(function(r){ if(r.who===m && r.muni) c[r.muni]=(c[r.muni]||0)+1; });
+      live.forEach(function(r){ if(r.who===m && r.muni) c[r.muni]=(c[r.muni]||0)+1; });
       drawMap($("small"+i), c, {color:"var("+MEMBER_VARS[i%3]+")"});
-      var n = recs.filter(function(r){ return r.who===m; }).length;
-      var as = {}; recs.forEach(function(r){ if(r.who===m){ var a=areaOf(r.muni); as[a]=(as[a]||0)+1; } });
+      var n = live.filter(function(r){ return r.who===m; }).length;
+      var as = {}; live.forEach(function(r){ if(r.who===m){ var a=areaOf(r.muni); as[a]=(as[a]||0)+1; } });
       $("smallcap"+i).textContent = n+"件 / "+Object.keys(as).map(function(a){return a+" "+as[a];}).join("・");
     });
 
@@ -829,8 +840,11 @@
     var bySpot = {};
     recs.forEach(function(r){
       if(!bySpot[r.spot]) bySpot[r.spot] = {spot:r.spot, muni:r.muni, muniEstimated:r.muniEstimated,
-        url:r.url, status:r.status, by:{}, score:0, memos:[]};
+        url:r.url, status:r.status, ids:[], by:{}, score:0, memos:[]};
       var s = bySpot[r.spot];
+      // 同じスポットが複数人から出ていると行も複数。採否はまとめて切り替える
+      if(r.id) s.ids.push(r.id);
+      if(r.status === "不採用") s.status = "不採用";
       s.by[r.who] = r.pri;
       s.score += PRI[r.pri].w;
       if(r.url && !s.url) s.url = r.url;
@@ -853,7 +867,13 @@
       var inPlan = IN_PLAN.some(function(n){ return s.spot.indexOf(n)>=0 || n.indexOf(s.spot)>=0; });
       var mapUrl = s.url || (s.muni ? "https://www.google.com/maps/search/?api=1&query=" +
         encodeURIComponent(s.spot+" "+s.muni) : "");
-      return '<tr>' +
+      var statusSel = s.ids.length
+        ? '<select class="stsel" data-ids="'+esc(s.ids.join(","))+'" aria-label="'+esc(s.spot)+' の採否">' +
+          ["採用","未定","不採用"].map(function(v){
+            return '<option value="'+v+'"'+(s.status===v?' selected':'')+'>'+v+'</option>';
+          }).join("") + '</select>'
+        : '<span class="chip">'+esc(s.status)+'</span>';
+      return '<tr'+(s.status==="不採用"?' class="rejected"':'')+'>' +
         '<td class="name">'+esc(s.spot) +
           (inPlan ? ' <span class="chip inplan">旅程入り済み</span>' : '') +
           (s.memos.length ? '<br><span class="empty">'+esc(s.memos.join(" / "))+'</span>' : '') + '</td>' +
@@ -861,7 +881,7 @@
         '<td>'+esc(s.muni || "—")+(s.muni && s.muniEstimated ? ' <span class="empty">推定</span>' : '')+'</td>' +
         members.map(function(m){ return '<td>'+priCell(s.by[m])+'</td>'; }).join("") +
         '<td class="num">'+s.score+'</td>' +
-        '<td><span class="chip">'+esc(s.status)+'</span></td>' +
+        '<td>'+statusSel+'</td>' +
         '<td>'+(mapUrl ? '<a href="'+esc(mapUrl)+'" target="_blank" rel="noopener">開く ↗</a>' : '<span class="empty">—</span>')+'</td>' +
       '</tr>';
     }).join("");
@@ -874,7 +894,7 @@
     // ---- by member ----
     $("bymember").tHead.innerHTML = '<tr><th>提出者</th><th>high</th><th>middle</th><th>low</th><th>合計</th><th>北部</th><th>中部</th><th>南部</th></tr>';
     $("bymember").tBodies[0].innerHTML = members.map(function(m){
-      var mine = recs.filter(function(r){ return r.who===m; });
+      var mine = live.filter(function(r){ return r.who===m; });
       var cnt = function(f){ return mine.filter(f).length; };
       return '<tr><td class="name">'+esc(m)+'</td>' +
         '<td class="num">'+cnt(function(r){return r.pri==="high";})+'</td>' +
@@ -963,7 +983,7 @@
   function load(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }
 
   // 最後に読み込んだ提出一覧。修正・取り下げのリストはここから作る
-  var RECS = [];
+  var RECS = [], REJECTED = 0;
 
   function currentWho(){
     var el = document.querySelector('input[name="who"]:checked');
@@ -1113,7 +1133,29 @@
     showMine();
   }
 
-  function start(){ setupForm(); loadData(false); }
+  // 採否は「みんなで決めるもの」なので、自分の提出でなくても切り替えられる
+  function bindStatus(){
+    $("spots").tBodies[0].addEventListener("change", function(ev){
+      var sel = ev.target.closest ? ev.target.closest(".stsel") : null;
+      if(!sel) return;
+      var who = currentWho();
+      if(!who){
+        window.alert("先に上のフォームで提出者を選んでください。");
+        return;
+      }
+      var ids = (sel.getAttribute("data-ids")||"").split(",").filter(function(x){ return x; });
+      if(!ids.length) return;
+      sel.disabled = true;
+      send({action:"status", ids:ids, who:who, status:sel.value})
+        .then(function(){ reload(); })
+        .catch(function(e){
+          window.alert("採否を変更できませんでした（" + e.message + "）");
+          sel.disabled = false;
+        });
+    });
+  }
+
+  function start(){ setupForm(); bindStatus(); loadData(false); }
 
   // 提出直後に呼ぶ。読み込み中の表示を挟まず、静かに差し替える
   function reload(){ loadData(true); }

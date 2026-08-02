@@ -27,6 +27,9 @@ var COL_WHO = 1, COL_URL = 2, COL_PRI = 3, COL_SPOT = 4, COL_MEMO = 5, COL_STATU
 // 提出者はこの3人だけ。wishlist.html の選択肢と揃えること
 var MEMBERS = ['Otsu', 'Sugi', 'Runto'];
 
+// 採否の取りうる値。不採用はシートに残したまま、地図と集計から外す
+var STATUSES = ['採用', '未定', '不採用'];
+
 // 一度に受け付ける最大件数（取りこぼしより暴走を止めることを優先）
 var MAX_ITEMS = 20;
 // ─────────────────────────────────────────────────────
@@ -94,6 +97,89 @@ function rowOfId_(sh, id) {
   return -1;
 }
 
+/**
+ * 短縮URL（maps.app.goo.gl）を実URLに展開する。
+ * ブラウザからは転送先を辿れないので、サーバー側であるここで解決してしまう。
+ * 展開できなければ null。
+ */
+function expandUrl_(url) {
+  if (!/^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(url)) return null;
+  var cur = url;
+  for (var i = 0; i < 5; i++) {
+    var res;
+    try {
+      res = UrlFetchApp.fetch(cur, { followRedirects: false, muteHttpExceptions: true });
+    } catch (e) {
+      return null;
+    }
+    var code = res.getResponseCode();
+    if (code < 300 || code >= 400) break;
+    var h = res.getAllHeaders();
+    var loc = h['Location'] || h['location'];
+    if (loc instanceof Array) loc = loc[0];
+    if (!loc) break;
+    cur = String(loc);
+    if (/\/maps\/place\/|!3d-?\d/.test(cur)) return cur;
+  }
+  return (cur !== url) ? cur : null;
+}
+
+/**
+ * 展開後のURLから名称と座標を取り出す。
+ * `@lat,lng` は地図の表示中心で実際の地点とズレることがあるため、
+ * 施設の座標である `!3d/!4d` を優先する。
+ */
+function parsePlace_(url) {
+  var out = { name: '', lat: null, lng: null };
+  var m = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
+          url.match(/[?&]q=(-?\d+\.\d+),\s*(-?\d+\.\d+)/) ||
+          url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (m) { out.lat = parseFloat(m[1]); out.lng = parseFloat(m[2]); }
+  var n = url.match(/\/maps\/place\/([^\/@?]+)/);
+  if (n) {
+    try { out.name = decodeURIComponent(n[1]).replace(/\+/g, ' ').trim(); } catch (e) {}
+  }
+  return out;
+}
+
+/**
+ * 短縮URLを、座標つきの素直な形に置き換える。
+ * 返り値は { url, spot }。解決できなければ null。
+ */
+function resolveShort_(url, spot) {
+  var expanded = expandUrl_(url);
+  if (!expanded) return null;
+  var p = parsePlace_(expanded);
+  if (p.lat == null) return null;
+  return {
+    url: 'https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng,
+    spot: spot || p.name
+  };
+}
+
+/**
+ * シートに残っている短縮URLを解決して書き戻す。
+ * 1回のリクエストで触る件数を絞って、doGet が重くならないようにする。
+ */
+function backfillShortUrls_(sh, max) {
+  var last = sh.getLastRow();
+  if (last < 2) return 0;
+  var rng = sh.getRange(2, COL_URL, last - 1, 3);   // URL / 優先度 / スポット名
+  var vals = rng.getValues();
+  var done = 0;
+  for (var i = 0; i < vals.length && done < max; i++) {
+    var url = trim_(vals[i][0], 500);
+    if (!/^https?:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps)/i.test(url)) continue;
+    var r = resolveShort_(url, trim_(vals[i][2], 80));
+    if (!r) continue;
+    vals[i][0] = r.url;
+    vals[i][2] = r.spot;
+    done++;
+  }
+  if (done) rng.setValues(vals);
+  return done;
+}
+
 function withLock_(fn) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -108,6 +194,8 @@ function doGet(e) {
     var values = withLock_(function () {
       var sh = sheet_();
       ensureIds_(sh);
+      // 短縮URLのまま残っている行をここで解決する。1回の読み込みにつき数件ずつ
+      backfillShortUrls_(sh, 5);
       SpreadsheetApp.flush();
       return sh.getDataRange().getDisplayValues();
     });
@@ -131,6 +219,7 @@ function doPost(e) {
     if (action === 'add') return addItems_(body);
     if (action === 'update') return updateItem_(body);
     if (action === 'remove') return removeItem_(body);
+    if (action === 'status') return setStatus_(body);
     return out_({ ok: false, error: 'unknown action' });
 
   } catch (err) {
@@ -153,6 +242,9 @@ function addItems_(body) {
     // 提出者は決め打ちの3人のみ。URLかスポット名のどちらかがあれば受け付ける
     if (MEMBERS.indexOf(who) < 0 || (!url && !spot)) continue;
     if (url && !/^https?:\/\//i.test(url)) continue;
+    // 短縮URLはこの場で座標つきに直す。名前が空なら地点名も貰う
+    var res = url ? resolveShort_(url, spot) : null;
+    if (res) { url = res.url; spot = res.spot; }
     var id = newId_();
     ids.push(id);
     rows.push([who, url, normPri_(it.pri), spot, trim_(it.memo, 200), '未定', id]);
@@ -196,6 +288,40 @@ function updateItem_(body) {
 
     SpreadsheetApp.flush();
     return out_({ ok: true, updated: 1 });
+  });
+}
+
+
+/**
+ * 採否を切り替える。
+ * 優先度と違って「みんなで決めるもの」なので、行の持ち主でなくても変更できる。
+ * 同じスポットが複数人から出ていると行も複数あるため、IDをまとめて受け取る。
+ */
+function setStatus_(body) {
+  var who = trim_(body.who, 40);
+  var status = trim_(body.status, 10);
+  var ids = Array.isArray(body.ids) ? body.ids : (body.id ? [body.id] : []);
+  if (MEMBERS.indexOf(who) < 0) return out_({ ok: false, error: 'invalid' });
+  if (STATUSES.indexOf(status) < 0) return out_({ ok: false, error: 'bad status' });
+  if (!ids.length || ids.length > MAX_ITEMS) return out_({ ok: false, error: 'invalid' });
+
+  return withLock_(function () {
+    var sh = sheet_();
+    ensureIds_(sh);
+    var last = sh.getLastRow();
+    if (last < 2) return out_({ ok: false, error: 'not found' });
+
+    var idCol = sh.getRange(2, COL_ID, last - 1, 1).getValues();
+    var stCol = sh.getRange(2, COL_STATUS, last - 1, 1).getValues();
+    var changed = 0;
+    for (var i = 0; i < idCol.length; i++) {
+      if (ids.indexOf(trim_(idCol[i][0], 40)) >= 0) { stCol[i][0] = status; changed++; }
+    }
+    if (!changed) return out_({ ok: false, error: 'not found' });
+
+    sh.getRange(2, COL_STATUS, stCol.length, 1).setValues(stCol);
+    SpreadsheetApp.flush();
+    return out_({ ok: true, changed: changed });
   });
 }
 
