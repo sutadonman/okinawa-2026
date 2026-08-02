@@ -1010,15 +1010,25 @@
     return jsonp(API_URL + "?what=expense")
       .then(function(j){
         if(!j || !j.ok) throw new Error(errText(j && j.error));
-        render(toExpenses(j.rows || []));
+        var rows = j.rows || [];
+        // 立替に対応する前のスクリプトは what=expense を無視して1枚目を返してくる。
+        // そのまま読むと「まだ1件も出ていません」に見えてしまうので、見出しで見分ける
+        var head = (rows[0] || []).map(function(h){ return String(h||"").trim(); });
+        if(head.length && head.indexOf("金額") < 0 && head.indexOf("立替者") < 0){
+          throw new Error("__old_script__");
+        }
+        render(toExpenses(rows));
       })
       .catch(function(e){
         $("content").classList.add("hide");
+        var old = (e.message === "__old_script__");
         $("status").innerHTML = '<div class="panel warn" style="margin-bottom:30px">' +
-          '<h3>立替シートにつながりませんでした</h3>' +
-          '<p>' + esc(e.message) + '</p>' +
-          '<p style="margin:0">スプレッドシートの Apps Script に <code>apps-script.gs</code> の中身を貼り直して、' +
-          '「デプロイを管理 → 鉛筆 → 新バージョン」で更新すると直ります。' +
+          '<h3>' + (old ? "スプレッドシート側のスクリプトがまだ古いままです"
+                        : "立替シートにつながりませんでした") + '</h3>' +
+          (old ? '<p>立替に対応していないスクリプトが応答しています（返ってきたのはスポット希望リストの中身でした）。</p>'
+               : '<p>' + esc(e.message) + '</p>') +
+          '<p style="margin:0">スプレッドシートの 拡張機能 → Apps Script に <code>apps-script.gs</code> の中身を貼り直して、' +
+          '「デプロイ → デプロイを管理 → 鉛筆 → バージョン「新バージョン」」で更新すると直ります。' +
           'そのあとこのページを開き直してください。</p></div>';
       });
   }
