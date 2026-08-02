@@ -87,6 +87,41 @@
     background:var(--umi);color:#fff;border:none;padding:9px 18px;border-radius:2px;
     margin-top:10px}
   button.ghost{background:transparent;color:var(--umi);border:1px solid var(--umi)}
+  button[disabled]{opacity:.55;cursor:default}
+
+  /* ---- submit form ---- */
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+  .field label .opt{font-weight:400;color:var(--muted);font-family:var(--font-mono);
+    font-size:10.5px;letter-spacing:.06em;margin-left:6px}
+  .field input[type=text],.field input[type=url],.field textarea.line{
+    width:100%;font-family:var(--font-body);font-size:16px;
+    border:1px solid var(--line);border-radius:3px;padding:10px 11px;
+    background:var(--ground);color:var(--text)}
+  .field textarea.line{min-height:0;height:44px;font-size:16px}
+  .field input:focus-visible,.field textarea:focus-visible{outline:2px solid var(--umi);outline-offset:1px}
+  .hint{font-size:11.5px;color:var(--muted);margin:5px 0 0;line-height:1.6}
+  fieldset{border:none;padding:0;margin:0 0 15px;min-width:0}
+  fieldset legend{font-size:12.5px;font-weight:600;padding:0;margin-bottom:6px}
+  .pris,.whos{display:flex;gap:8px;flex-wrap:wrap}
+  .pris label,.whos label{flex:1 1 64px;position:relative;display:block;cursor:pointer;margin:0}
+  .pris input,.whos input{position:absolute;opacity:0;width:0;height:0}
+  .pris span,.whos span{display:block;text-align:center;font-size:12.5px;padding:9px 6px;
+    border:1px solid var(--line);border-radius:3px;background:var(--ground);color:var(--muted)}
+  .pris span b{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em}
+  .whos span{font-weight:600;font-size:14px;padding:11px 4px}
+  .pris input:checked + span,.whos input:checked + span{border-color:var(--umi);
+    background:var(--umi-soft);color:var(--umi);font-weight:600}
+  .pris input:focus-visible + span,.whos input:focus-visible + span{
+    outline:2px solid var(--umi);outline-offset:2px}
+  .formrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .msg{font-size:12.5px;margin:0;flex:1 1 180px}
+  .msg.ok{color:var(--umi)}
+  .msg.ng{color:var(--bin)}
+  .mine{margin:16px 0 0;padding-top:13px;border-top:1px solid var(--line-soft);
+    font-size:12.5px;color:var(--muted)}
+  .mine ol{margin:6px 0 0;padding-left:1.3em}
+  .mine li{margin-bottom:3px}
 
   /* ---- stat tiles ---- */
   .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
@@ -148,12 +183,70 @@
   <div class="wrap">
     <p class="eyebrow">Wishlist Dashboard</p>
     <h1>行きたいスポット 集計</h1>
-    <p class="sub">各自がスプレッドシートに提出した候補を、エリア・優先度・提出者ごとに集計します</p>
+    <p class="sub">このページから行きたい場所を提出できます。集まった候補はエリア・優先度・提出者ごとに集計されます</p>
     <a class="back" href="./">← 旅程表に戻る</a>
   </div>
 </header>
 
 <div class="wrap">
+
+  <section class="block" id="formblock">
+    <p class="eyebrow">Submit</p>
+    <h2>行きたいところを出す</h2>
+    <p class="lede">Google マップでその場所を開いて「共有」→「リンクをコピー」したものを貼るだけ。1件ずつ、何度でも送れます。</p>
+
+    <div class="panel" id="formpanel">
+      <form id="wform" novalidate>
+        <fieldset>
+          <legend>あなたは</legend>
+          <div class="whos">
+            <label><input type="radio" name="who" value="Otsu"><span>Otsu</span></label>
+            <label><input type="radio" name="who" value="Sugi"><span>Sugi</span></label>
+            <label><input type="radio" name="who" value="Runto"><span>Runto</span></label>
+          </div>
+          <p class="hint">一度選ぶと次回から選ばれた状態になります（この端末にだけ残ります）。</p>
+        </fieldset>
+
+        <div class="field">
+          <label for="f-url">Google マップのリンク</label>
+          <input id="f-url" type="url" inputmode="url" maxlength="500"
+                 placeholder="https://maps.app.goo.gl/… を貼り付け">
+          <p class="hint">短縮リンク（<code>maps.app.goo.gl</code>）でも構いませんが、そのままでは地図に出ないので後でこちらが座標を調べます。すぐ反映させたい場合は、パソコンの Google マップでピンを右クリック →
+            出てきた緯度経度をクリックしてコピーし、スポット名だけ書いて送ってください。</p>
+        </div>
+
+        <div class="field">
+          <label for="f-spot">スポット名<span class="opt">任意</span></label>
+          <input id="f-spot" type="text" maxlength="80" placeholder="万座毛">
+          <p class="hint">空欄でも、リンクから分かればこちらで補います。</p>
+        </div>
+
+        <fieldset>
+          <legend>どれくらい行きたいか</legend>
+          <div class="pris">
+            <label><input type="radio" name="pri" value="high"><span><b>high</b>絶対行きたい</span></label>
+            <label><input type="radio" name="pri" value="middle" checked><span><b>middle</b>行けたら</span></label>
+            <label><input type="radio" name="pri" value="low"><span><b>low</b>余裕があれば</span></label>
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="f-memo">ひとこと<span class="opt">任意</span></label>
+          <textarea id="f-memo" class="line" maxlength="200" placeholder="遊歩道一周15分"></textarea>
+        </div>
+
+        <div class="formrow">
+          <button type="submit" id="f-send">この内容で提出する</button>
+          <p class="msg" id="f-msg"></p>
+        </div>
+      </form>
+
+      <div class="mine hide" id="mine">
+        <span id="minehead"></span>
+        <ol id="minelist"></ol>
+      </div>
+    </div>
+  </section>
 
   <div id="status"></div>
 
@@ -213,8 +306,17 @@
 (function(){
   "use strict";
 
-  // ── 設定：スプレッドシートを「ウェブに公開（CSV）」したURLをここに入れる ──
+  // ── 設定 ────────────────────────────────────────────
+  // Apps Script を「ウェブアプリ」としてデプロイしたURL（/exec で終わるもの）。
+  // ここが空のあいだは提出フォームが無効になり、設定手順が表示される。
+  var API_URL = "https://script.google.com/macros/s/AKfycbxoPCHPlRPAf5NAQ9E1nqMKMj0UXoQkZJrwQQ6KPglmDgtoKmFNLgv7Vt34iVjYrJGG/exec";
+
+  // apps-script.gs の TOKEN と同じ文字列。いたずら投稿を止めるだけの合言葉
+  var TOKEN = "okinawa2026-3nin-2f9a41c7";
+
+  // 旧方式（シートを「ウェブに公開」した CSV）。API_URL があればそちらが優先される
   var SHEET_CSV_URL = "";
+  // ────────────────────────────────────────────────────
 
   // 市町村のおおよその中心座標（模式図用）
   var MUNI = {
@@ -566,10 +668,10 @@
       '<div class="panel warn"><h3>まだ提出シートにつながっていません</h3>' +
       (msg ? '<p>'+esc(msg)+'</p>' : '') +
       '<ol>' +
-      '<li><a href="wishlist-template.csv" download>wishlist-template.csv</a> をダウンロードし、Google スプレッドシートに読み込む（ファイル → インポート）。現行の旅程は Otsu の提出分として入っています</li>' +
-      '<li>メンバー3人に「編集者」権限で共有する。各自は行を足して、<code>提出者</code>・<code>GoogleマップURL</code>・<code>優先度</code>（high / middle / low）を埋めるだけ</li>' +
-      '<li>ファイル → 共有 → <code>ウェブに公開</code> → 形式を <code>カンマ区切り形式(.csv)</code> にして公開</li>' +
-      '<li>表示されたURLを伝えてもらえれば、このページに組み込みます</li>' +
+      '<li>Google スプレッドシート「沖縄2026 スポット希望リスト」を開く（マイドライブの <code>/trip/202610沖縄/</code> 配下）</li>' +
+      '<li>拡張機能 → Apps Script を開き、<code>apps-script.gs</code> の中身を貼り付ける</li>' +
+      '<li>デプロイ → 新しいデプロイ → 種類は<code>ウェブアプリ</code>、実行するユーザーを<code>自分</code>、アクセスできるユーザーを<code>全員</code>にする</li>' +
+      '<li>表示された <code>/exec</code> で終わるURLを Claude に渡してください。このページの <code>API_URL</code> に入れれば、提出フォームと自動集計が有効になります</li>' +
       '</ol>' +
       '<p style="margin-top:14px">先に中身を見たい場合は、シートの内容をコピーしてここに貼り付けてください。この端末だけで集計します（どこにも送信しません）。</p>' +
       '<textarea id="paste" placeholder="提出者,GoogleマップURL,優先度,スポット名,... を貼り付け"></textarea>' +
@@ -587,6 +689,127 @@
     });
   }
 
+  // ── 提出フォーム ──
+  // Apps Script は別オリジンなので、読み取りは JSONP で取りに行く
+  // （通常の fetch だとリダイレクト先で CORS に引っかかることがある）
+  function jsonp(url, timeoutMs){
+    return new Promise(function(resolve, reject){
+      var name = "wlcb_" + Math.random().toString(36).slice(2);
+      var s = document.createElement("script");
+      var timer = setTimeout(function(){ done(); reject(new Error("時間内に応答がありません")); }, timeoutMs||15000);
+      function done(){
+        clearTimeout(timer);
+        try{ delete window[name]; }catch(e){ window[name] = undefined; }
+        if(s.parentNode) s.parentNode.removeChild(s);
+      }
+      window[name] = function(data){ done(); resolve(data); };
+      s.onerror = function(){ done(); reject(new Error("接続できません")); };
+      s.src = url + (url.indexOf("?")<0 ? "?" : "&") + "callback=" + name;
+      document.head.appendChild(s);
+    });
+  }
+
+  function post(items){
+    var payload = JSON.stringify({token:TOKEN, items:items});
+    // text/plain にすると preflight が飛ばないぶん通りやすい
+    var opts = {method:"POST", body:payload,
+                headers:{"Content-Type":"text/plain;charset=utf-8"}};
+    return fetch(API_URL, opts)
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j || !j.ok) throw new Error(j && j.error ? j.error : "拒否されました");
+        return j;
+      })
+      .catch(function(err){
+        // CORS で応答を読めない環境向けの保険。送信自体は届くので、
+        // 結果を確認できないことだけ呼び出し側に伝える
+        return fetch(API_URL, {method:"POST", mode:"no-cors", body:payload,
+                               headers:{"Content-Type":"text/plain;charset=utf-8"}})
+          .then(function(){ return {ok:true, unverified:true}; })
+          .catch(function(){ throw err; });
+      });
+  }
+
+  var MINE_KEY = "okinawa2026.mine", WHO_KEY = "okinawa2026.who";
+  function store(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function load(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }
+
+  function showMine(){
+    var raw = load(MINE_KEY), list;
+    try{ list = JSON.parse(raw||"[]"); }catch(e){ list = []; }
+    if(!list.length){ $("mine").classList.add("hide"); return; }
+    $("mine").classList.remove("hide");
+    $("minehead").textContent = "この端末から提出した " + list.length + "件";
+    $("minelist").innerHTML = list.map(function(x){
+      return "<li>" + esc(x.spot || x.url) + "（" + esc(x.pri) + "）</li>";
+    }).join("");
+  }
+
+  function setupForm(){
+    var form = $("wform"), msg = $("f-msg"), send = $("f-send");
+
+    if(!API_URL){
+      $("formpanel").innerHTML =
+        '<h3>提出フォームはまだ有効になっていません</h3>' +
+        '<p>送信先（Apps Script のウェブアプリURL）が未設定です。README.md の手順でデプロイし、' +
+        '表示された <code>/exec</code> で終わるURLを Claude に渡してください。' +
+        'このページの <code>API_URL</code> に入れれば、ここが入力フォームに変わります。</p>';
+      $("formpanel").classList.add("warn");
+      return;
+    }
+
+    var saved = load(WHO_KEY);
+    if(saved){
+      var pre = form.querySelector('input[name="who"][value="'+saved.replace(/"/g,"")+'"]');
+      if(pre) pre.checked = true;
+    }
+    showMine();
+
+    form.addEventListener("submit", function(ev){
+      ev.preventDefault();
+      var whoEl = form.querySelector('input[name="who"]:checked');
+      var who  = whoEl ? whoEl.value : "";
+      var url  = $("f-url").value.trim();
+      var spot = $("f-spot").value.trim();
+      var memo = $("f-memo").value.trim();
+      var priEl = form.querySelector('input[name="pri"]:checked');
+      var pri = priEl ? priEl.value : "middle";
+
+      msg.className = "msg";
+      if(!who){
+        msg.className="msg ng"; msg.textContent="提出者を選んでください。";
+        form.querySelector('input[name="who"]').focus(); return;
+      }
+      if(!url && !spot){ msg.className="msg ng"; msg.textContent="リンクかスポット名のどちらかは必要です。"; $("f-url").focus(); return; }
+      if(url && !/^https?:\/\//i.test(url)){ msg.className="msg ng"; msg.textContent="リンクは http から始まる形で貼ってください。"; $("f-url").focus(); return; }
+
+      send.disabled = true;
+      msg.textContent = "送信しています…";
+
+      post([{who:who, url:url, spot:spot, pri:pri, memo:memo}])
+        .then(function(res){
+          store(WHO_KEY, who);
+          var list; try{ list = JSON.parse(load(MINE_KEY)||"[]"); }catch(e){ list=[]; }
+          list.push({spot:spot, url:url, pri:pri});
+          store(MINE_KEY, JSON.stringify(list));
+
+          $("f-url").value=""; $("f-spot").value=""; $("f-memo").value="";
+          form.querySelector('input[name="pri"][value="middle"]').checked = true;
+          msg.className = "msg ok";
+          msg.textContent = res.unverified
+            ? "送信しました（このブラウザでは結果を確認できないため、下の集計に出るか確かめてください）。"
+            : "提出しました。続けて出せます。";
+          showMine();
+          setTimeout(reload, 1200);
+        })
+        .catch(function(err){
+          msg.className = "msg ng";
+          msg.textContent = "送信できませんでした（" + err.message + "）。もう一度試すか、内容を LINE で送ってください。";
+        })
+        .then(function(){ send.disabled = false; });
+    });
+  }
+
   // 短縮URLの対応表を先に読む（無くても動く）
   fetch("resolved.json", {cache:"no-store"})
     .then(function(r){ return r.ok ? r.json() : {}; })
@@ -596,21 +819,51 @@
       start();
     });
 
-  function start(){
-    if(!SHEET_CSV_URL){ setupPanel(""); return; }
-    $("status").innerHTML = '<div class="panel"><p style="margin:0">提出シートを読み込んでいます…</p></div>';
-    fetch(SHEET_CSV_URL, {cache:"no-store"})
-      .then(function(res){ if(!res.ok) throw new Error("HTTP "+res.status); return res.text(); })
-      .then(function(text){
-        var recs = toRecords(parseCSV(text));
-        $("status").innerHTML = "";
-        if(!recs.length){
-          $("status").innerHTML = '<div class="panel warn"><h3>まだ提出がありません</h3><p style="margin:0">シートには接続できています。誰かが1行入力すると、ここに集計が出ます。</p></div>';
-          return;
-        }
-        render(recs);
-      })
-      .catch(function(e){ setupPanel("シートの読み込みに失敗しました（"+e.message+"）。公開設定を確認するか、下の貼り付けで暫定的に集計できます。"); });
+  function noneYet(){
+    $("status").innerHTML = '<div class="panel warn"><h3>まだ提出がありません</h3>' +
+      '<p style="margin:0">シートには接続できています。上のフォームから1件出すと、ここに集計が出ます。</p></div>';
+    $("content").classList.add("hide");
+  }
+
+  function start(){ setupForm(); loadData(false); }
+
+  // 提出直後に呼ぶ。読み込み中の表示を挟まず、静かに差し替える
+  function reload(){ loadData(true); }
+
+  function loadData(quiet){
+    if(API_URL){
+      if(!quiet){
+        $("status").innerHTML = '<div class="panel"><p style="margin:0">提出を読み込んでいます…</p></div>';
+      }
+      jsonp(API_URL)
+        .then(function(j){
+          if(!j || !j.ok) throw new Error(j && j.error ? j.error : "読み取れませんでした");
+          var recs = toRecords(j.rows || []);
+          $("status").innerHTML = "";
+          if(!recs.length){ noneYet(); return; }
+          render(recs);
+        })
+        .catch(function(e){
+          setupPanel("提出の読み込みに失敗しました（"+e.message+"）。デプロイのアクセス権が「全員」になっているか確認してください。");
+        });
+      return;
+    }
+
+    if(SHEET_CSV_URL){
+      $("status").innerHTML = '<div class="panel"><p style="margin:0">提出シートを読み込んでいます…</p></div>';
+      fetch(SHEET_CSV_URL, {cache:"no-store"})
+        .then(function(res){ if(!res.ok) throw new Error("HTTP "+res.status); return res.text(); })
+        .then(function(text){
+          var recs = toRecords(parseCSV(text));
+          $("status").innerHTML = "";
+          if(!recs.length){ noneYet(); return; }
+          render(recs);
+        })
+        .catch(function(e){ setupPanel("シートの読み込みに失敗しました（"+e.message+"）。公開設定を確認するか、下の貼り付けで暫定的に集計できます。"); });
+      return;
+    }
+
+    setupPanel("");
   }
 })();
 </script>
