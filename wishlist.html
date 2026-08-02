@@ -150,6 +150,10 @@
   .legend i{width:11px;height:11px;border-radius:50%;flex:none;display:inline-block}
 
   /* ---- google map ---- */
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+  .chipbtn{margin-top:0;font-size:12.5px;font-weight:400;padding:6px 14px;border-radius:999px;
+    background:var(--ground);color:var(--muted);border:1px solid var(--line)}
+  .chipbtn.on{background:var(--umi-soft);color:var(--umi);border-color:var(--umi);font-weight:600}
   #gmap{width:100%;height:460px;border-radius:3px;background:var(--line-soft)}
   @media (max-width:560px){ #gmap{height:380px} }
   /* InfoWindow の中身。Google 側の白背景の上に載るので、色は固定値で指定する */
@@ -244,6 +248,14 @@
         </div>
 
         <fieldset>
+          <legend>どんな場所か</legend>
+          <div class="pris">
+            <label><input type="radio" name="kind" value="観光" checked><span><b>観光</b>見るところ</span></label>
+            <label><input type="radio" name="kind" value="ご飯"><span><b>ご飯</b>食べるところ</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
           <legend>どれくらい行きたいか</legend>
           <div class="pris">
             <label><input type="radio" name="pri" value="high"><span><b>high</b>絶対行きたい</span></label>
@@ -285,8 +297,13 @@
     <section class="block hide" id="gmapblock">
       <p class="eyebrow">Map</p>
       <h2>出ているスポットを地図で見る</h2>
-      <p class="lede">色が提出者、濃さと大きさが優先度です。ピンにマウスを合わせる（スマホはタップ）と、写真とひとことが出ます。カード内のリンクから Google マップを開けます。</p>
+      <p class="lede">色が提出者、濃さと大きさが優先度、形が種別（丸＝観光／四角＝ご飯）です。ピンにマウスを合わせる（スマホはタップ）と、写真とひとことが出ます。カード内のリンクから Google マップを開けます。</p>
       <div class="mapcard">
+        <div class="chips" id="gfilter">
+          <button type="button" class="chipbtn on" data-kind="all">すべて</button>
+          <button type="button" class="chipbtn" data-kind="観光">観光</button>
+          <button type="button" class="chipbtn" data-kind="ご飯">ご飯</button>
+        </div>
         <div id="gmap"></div>
         <div class="legend" id="glegend"></div>
         <p class="note" id="gnote"></p>
@@ -474,7 +491,8 @@
       url: idx(["GoogleマップURL","Googleマップリンク","マップリンク","URL","リンク"]),
       memo: idx(["ひとこと","メモ","コメント"]),
       status: idx(["採否","ステータス"]),
-      id: idx(["ID"])
+      id: idx(["ID"]),
+      kind: idx(["種別"])
     };
     var out=[];
     for(var r=1;r<rows.length;r++){
@@ -511,7 +529,8 @@
         resolved: !!ll,
         pri: normPri(c.pri>=0?row[c.pri]:"") || "middle",
         memo:(c.memo>=0?row[c.memo]:"").trim(),
-        status:(c.status>=0?row[c.status]:"").trim() || "未定"
+        status:(c.status>=0?row[c.status]:"").trim() || "未定",
+        kind:((c.kind>=0?row[c.kind]:"").trim() === "ご飯") ? "ご飯" : "観光"
       });
     }
     return out;
@@ -519,6 +538,8 @@
 
   // ── Google マップ ──
   var GMAP=null, GINFO=null, GMARKERS=[], GOPEN=null, GLOADING=null;
+  // 地図の絞り込み状態と、絞り直すために最後に描いた内容
+  var KIND_FILTER = "all", GLAST = null;
 
   function cssVar(name){
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -621,11 +642,24 @@
     });
   }
 
+  // 種別ごとのピンの形。色（提出者）と大きさ（優先度）を既に使っているので、
+  // 3つ目の区別には形を割り当てる。小さい点でも丸と四角なら見分けがつく
+  function iconPath(kind){
+    return kind === "ご飯"
+      ? "M -1,-1 1,-1 1,1 -1,1 z"          // 四角
+      : google.maps.SymbolPath.CIRCLE;      // 丸
+  }
+
   function buildGoogleMap(recs, members){
-    var pts = recs.filter(function(r){ return r.lat!=null && r.lng!=null; });
-    if(!pts.length) return;
+    GLAST = {recs:recs, members:members};
+
+    var pts = recs.filter(function(r){
+      if(r.lat==null || r.lng==null) return false;
+      return KIND_FILTER === "all" || r.kind === KIND_FILTER;
+    });
 
     $("gmapblock").classList.remove("hide");
+    if(!pts.length && !GMAP) return;
 
     if(!GMAP){
       GMAP = new google.maps.Map($("gmap"), {
@@ -652,7 +686,7 @@
         position:{lat:r.lat, lng:r.lng}, map:GMAP, title:r.spot,
         // high を前面に出して、重なったときに埋もれないようにする
         zIndex: r.pri==="high" ? 3 : r.pri==="middle" ? 2 : 1,
-        icon:{ path:google.maps.SymbolPath.CIRCLE, scale:SIZE[r.pri]||8,
+        icon:{ path:iconPath(r.kind), scale:SIZE[r.pri]||8,
                fillColor:color, fillOpacity:OPACITY[r.pri]||0.7,
                strokeColor:"#ffffff", strokeWeight:2 }
       });
@@ -663,23 +697,38 @@
       bounds.extend(mk.getPosition());
     });
 
-    GMAP.fitBounds(bounds, 44);
+    if(pts.length) GMAP.fitBounds(bounds, 44);
 
     $("glegend").innerHTML =
       members.map(function(m,i){
         return '<span><i style="background:'+esc(cssVar(MEMBER_VARS[i%3]))+'"></i>'+esc(m)+'</span>';
       }).join("") +
+      '<span><i style="background:var(--muted)"></i>観光</span>' +
+      '<span><i style="border-radius:0;background:var(--muted)"></i>ご飯</span>' +
       ['high','middle','low'].map(function(p){
         var d = SIZE[p];
         return '<span><i class="sz" style="width:'+d+'px;height:'+d+'px;background:var(--muted);'+
                'opacity:'+OPACITY[p]+'"></i>'+p+'</span>';
       }).join("");
 
-    var noPos = recs.length - pts.length;
+    var withPos = recs.filter(function(r){ return r.lat!=null && r.lng!=null; }).length;
     var parts = [pts.length + "件を表示しています。"];
-    if(noPos) parts.push("座標が分からない " + noPos + "件は出ていません。");
+    if(KIND_FILTER !== "all") parts.push("種別「" + KIND_FILTER + "」で絞り込み中。");
+    if(recs.length - withPos) parts.push("座標が分からない " + (recs.length-withPos) + "件は出ていません。");
     if(REJECTED) parts.push("不採用の " + REJECTED + "件も外しています。");
     $("gnote").textContent = parts.join("");
+  }
+
+  function bindMapFilter(){
+    $("gfilter").addEventListener("click", function(ev){
+      var btn = ev.target.closest ? ev.target.closest(".chipbtn") : null;
+      if(!btn) return;
+      KIND_FILTER = btn.getAttribute("data-kind");
+      [].forEach.call($("gfilter").querySelectorAll(".chipbtn"), function(b){
+        b.classList.toggle("on", b === btn);
+      });
+      if(GLAST) buildGoogleMap(GLAST.recs, GLAST.members);
+    });
   }
 
   function setupGoogleMap(recs, members){
@@ -740,11 +789,12 @@
     var bySpot = {};
     recs.forEach(function(r){
       if(!bySpot[r.spot]) bySpot[r.spot] = {spot:r.spot, muni:r.muni, muniEstimated:r.muniEstimated,
-        url:r.url, status:r.status, ids:[], by:{}, score:0, memos:[]};
+        url:r.url, status:r.status, kind:r.kind, ids:[], by:{}, score:0, memos:[]};
       var s = bySpot[r.spot];
       // 同じスポットが複数人から出ていると行も複数。採否はまとめて切り替える
       if(r.id) s.ids.push(r.id);
       if(r.status === "不採用") s.status = "不採用";
+      if(r.kind === "ご飯") s.kind = "ご飯";
       s.by[r.who] = r.pri;
       s.score += PRI[r.pri].w;
       if(r.url && !s.url) s.url = r.url;
@@ -754,7 +804,7 @@
     var list = Object.keys(bySpot).map(function(k){ return bySpot[k]; });
     list.sort(function(a,b){ return b.score-a.score || a.spot.localeCompare(b.spot,"ja"); });
 
-    var head = '<tr><th>スポット</th><th>エリア</th><th>市町村</th>' +
+    var head = '<tr><th>スポット</th><th>種別</th><th>エリア</th><th>市町村</th>' +
       members.map(function(m){ return '<th>'+esc(m)+'</th>'; }).join("") +
       '<th>スコア</th><th>状態</th><th>地図</th></tr>';
     $("spots").tHead.innerHTML = head;
@@ -773,10 +823,17 @@
             return '<option value="'+v+'"'+(s.status===v?' selected':'')+'>'+v+'</option>';
           }).join("") + '</select>'
         : '<span class="chip">'+esc(s.status)+'</span>';
+      var kindSel = s.ids.length
+        ? '<select class="stsel kindsel" data-ids="'+esc(s.ids.join(","))+'" aria-label="'+esc(s.spot)+' の種別">' +
+          ["観光","ご飯"].map(function(v){
+            return '<option value="'+v+'"'+(s.kind===v?' selected':'')+'>'+v+'</option>';
+          }).join("") + '</select>'
+        : '<span class="chip">'+esc(s.kind||"観光")+'</span>';
       return '<tr'+(s.status==="不採用"?' class="rejected"':'')+'>' +
         '<td class="name">'+esc(s.spot) +
           (inPlan ? ' <span class="chip inplan">旅程入り済み</span>' : '') +
           (s.memos.length ? '<br><span class="empty">'+esc(s.memos.join(" / "))+'</span>' : '') + '</td>' +
+        '<td>'+kindSel+'</td>' +
         '<td>'+esc(areaOf(s.muni))+'</td>' +
         '<td>'+esc(s.muni || "—")+(s.muni && s.muniEstimated ? ' <span class="empty">推定</span>' : '')+'</td>' +
         members.map(function(m){ return '<td>'+priCell(s.by[m])+'</td>'; }).join("") +
@@ -985,6 +1042,8 @@
       var memo = $("f-memo").value.trim();
       var priEl = form.querySelector('input[name="pri"]:checked');
       var pri = priEl ? priEl.value : "middle";
+      var kindEl = form.querySelector('input[name="kind"]:checked');
+      var kind = kindEl ? kindEl.value : "観光";
 
       msg.className = "msg";
       if(!who){
@@ -997,11 +1056,12 @@
       sendBtn.disabled = true;
       msg.textContent = "送信しています…";
 
-      send({action:"add", items:[{who:who, url:url, spot:spot, pri:pri, memo:memo}]})
+      send({action:"add", items:[{who:who, url:url, spot:spot, pri:pri, memo:memo, kind:kind}]})
         .then(function(res){
           store(WHO_KEY, who);
           $("f-url").value=""; $("f-spot").value=""; $("f-memo").value="";
           form.querySelector('input[name="pri"][value="middle"]').checked = true;
+          form.querySelector('input[name="kind"][value="観光"]').checked = true;
           msg.className = "msg ok";
           msg.textContent = res.unverified
             ? "送信しました（このブラウザでは結果を確認できないため、下の集計に出るか確かめてください）。"
@@ -1045,17 +1105,21 @@
       }
       var ids = (sel.getAttribute("data-ids")||"").split(",").filter(function(x){ return x; });
       if(!ids.length) return;
+      var isKind = sel.classList.contains("kindsel");
+      var payload = isKind
+        ? {action:"kind",   ids:ids, who:who, kind:sel.value}
+        : {action:"status", ids:ids, who:who, status:sel.value};
       sel.disabled = true;
-      send({action:"status", ids:ids, who:who, status:sel.value})
+      send(payload)
         .then(function(){ reload(); })
         .catch(function(e){
-          window.alert("採否を変更できませんでした（" + e.message + "）");
+          window.alert((isKind?"種別":"採否") + "を変更できませんでした（" + e.message + "）");
           sel.disabled = false;
         });
     });
   }
 
-  function start(){ setupForm(); bindStatus(); loadData(false); }
+  function start(){ setupForm(); bindStatus(); bindMapFilter(); loadData(false); }
 
   // 提出直後に呼ぶ。読み込み中の表示を挟まず、静かに差し替える
   function reload(){ loadData(true); }

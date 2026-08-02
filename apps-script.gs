@@ -20,15 +20,20 @@ var SHEET_ID = '12VYd7jl6_IPttbCkA974p-PhVPWRuAK9A6laz8hJABI';
 // いたずら投稿を止めるだけの合言葉で、秘密の情報は入れない。
 var TOKEN = 'okinawa2026-3nin-2f9a41c7';
 
-// シートの列の並び。7列目のIDは、修正・取り下げのために後から足したもの
-var HEADERS = ['提出者', 'GoogleマップURL', '優先度', 'スポット名', 'ひとこと', '採否', 'ID'];
-var COL_WHO = 1, COL_URL = 2, COL_PRI = 3, COL_SPOT = 4, COL_MEMO = 5, COL_STATUS = 6, COL_ID = 7;
+// シートの列の並び。7列目のIDと8列目の種別は、後から足したもの
+var HEADERS = ['提出者', 'GoogleマップURL', '優先度', 'スポット名', 'ひとこと', '採否', 'ID', '種別'];
+var COL_WHO = 1, COL_URL = 2, COL_PRI = 3, COL_SPOT = 4, COL_MEMO = 5,
+    COL_STATUS = 6, COL_ID = 7, COL_KIND = 8;
 
 // 提出者はこの3人だけ。wishlist.html の選択肢と揃えること
 var MEMBERS = ['Otsu', 'Sugi', 'Runto'];
 
 // 採否の取りうる値。不採用はシートに残したまま、地図と集計から外す
 var STATUSES = ['採用', '未定', '不採用'];
+
+// 種別。地図では 観光=丸 / ご飯=四角 で描き分ける。既存行は 観光 で埋める
+var KINDS = ['観光', 'ご飯'];
+var KIND_DEFAULT = '観光';
 
 // 一度に受け付ける最大件数（取りこぼしより暴走を止めることを優先）
 var MAX_ITEMS = 20;
@@ -102,6 +107,24 @@ function ensureIds_(sh) {
     if (!trim_(ids[i][0], 40)) { ids[i][0] = newId_(); changed = true; }
   }
   if (changed) sh.getRange(2, COL_ID, ids.length, 1).setValues(ids);
+}
+
+/** 種別の見出しと、まだ空の既存行を 観光 で埋める */
+function ensureKinds_(sh) {
+  var last = sh.getLastRow();
+  if (last < 1) return;
+
+  if (trim_(sh.getRange(1, COL_KIND).getValue(), 20) !== '種別') {
+    sh.getRange(1, COL_KIND).setValue('種別');
+  }
+  if (last < 2) return;
+
+  var vals = sh.getRange(2, COL_KIND, last - 1, 1).getValues();
+  var changed = false;
+  for (var i = 0; i < vals.length; i++) {
+    if (KINDS.indexOf(trim_(vals[i][0], 10)) < 0) { vals[i][0] = KIND_DEFAULT; changed = true; }
+  }
+  if (changed) sh.getRange(2, COL_KIND, vals.length, 1).setValues(vals);
 }
 
 /** IDから行番号を引く。見つからなければ -1 */
@@ -249,6 +272,7 @@ function doGet(e) {
     var values = withLock_(function () {
       var sh = sheet_();
       ensureIds_(sh);
+      ensureKinds_(sh);
       // 短縮URLのまま残っている行をここで解決する。1回の読み込みにつき数件ずつ
       backfillShortUrls_(sh, 5);
       SpreadsheetApp.flush();
@@ -275,6 +299,7 @@ function doPost(e) {
     if (action === 'update') return updateItem_(body);
     if (action === 'remove') return removeItem_(body);
     if (action === 'status') return setStatus_(body);
+    if (action === 'kind') return setKind_(body);
     return out_({ ok: false, error: 'unknown action' });
 
   } catch (err) {
@@ -300,9 +325,11 @@ function addItems_(body) {
     // 短縮URLはこの場で座標つきに直す。名前が空なら地点名も貰う
     var res = url ? resolveShort_(url, spot) : null;
     if (res) { url = res.url; spot = res.spot; }
+    var kind = trim_(it.kind, 10);
+    if (KINDS.indexOf(kind) < 0) kind = KIND_DEFAULT;
     var id = newId_();
     ids.push(id);
-    rows.push([who, url, normPri_(it.pri), spot, trim_(it.memo, 200), '未定', id]);
+    rows.push([who, url, normPri_(it.pri), spot, trim_(it.memo, 200), '未定', id, kind]);
   }
   if (!rows.length) return out_({ ok: false, error: 'invalid' });
 
@@ -310,6 +337,7 @@ function addItems_(body) {
   return withLock_(function () {
     var sh = sheet_();
     ensureIds_(sh);
+    ensureKinds_(sh);
     if (sh.getLastRow() === 0) {
       sh.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
     }
@@ -328,6 +356,7 @@ function updateItem_(body) {
   return withLock_(function () {
     var sh = sheet_();
     ensureIds_(sh);
+    ensureKinds_(sh);
     var row = rowOfId_(sh, id);
     if (row < 0) return out_({ ok: false, error: 'not found' });
     // 自分が出した行以外は触らせない
@@ -363,6 +392,7 @@ function setStatus_(body) {
   return withLock_(function () {
     var sh = sheet_();
     ensureIds_(sh);
+    ensureKinds_(sh);
     var last = sh.getLastRow();
     if (last < 2) return out_({ ok: false, error: 'not found' });
 
@@ -381,6 +411,40 @@ function setStatus_(body) {
 }
 
 
+/**
+ * 種別（観光 / ご飯）を切り替える。採否と同じく場所そのものの属性なので、
+ * 行の持ち主でなくても変更できる。
+ */
+function setKind_(body) {
+  var who = trim_(body.who, 40);
+  var kind = trim_(body.kind, 10);
+  var ids = Array.isArray(body.ids) ? body.ids : (body.id ? [body.id] : []);
+  if (MEMBERS.indexOf(who) < 0) return out_({ ok: false, error: 'invalid' });
+  if (KINDS.indexOf(kind) < 0) return out_({ ok: false, error: 'bad kind' });
+  if (!ids.length || ids.length > MAX_ITEMS) return out_({ ok: false, error: 'invalid' });
+
+  return withLock_(function () {
+    var sh = sheet_();
+    ensureIds_(sh);
+    ensureKinds_(sh);
+    var last = sh.getLastRow();
+    if (last < 2) return out_({ ok: false, error: 'not found' });
+
+    var idCol = sh.getRange(2, COL_ID, last - 1, 1).getValues();
+    var kCol = sh.getRange(2, COL_KIND, last - 1, 1).getValues();
+    var changed = 0;
+    for (var i = 0; i < idCol.length; i++) {
+      if (ids.indexOf(trim_(idCol[i][0], 40)) >= 0) { kCol[i][0] = kind; changed++; }
+    }
+    if (!changed) return out_({ ok: false, error: 'not found' });
+
+    sh.getRange(2, COL_KIND, kCol.length, 1).setValues(kCol);
+    SpreadsheetApp.flush();
+    return out_({ ok: true, changed: changed });
+  });
+}
+
+
 function removeItem_(body) {
   var id = trim_(body.id, 40);
   var who = trim_(body.who, 40);
@@ -389,6 +453,7 @@ function removeItem_(body) {
   return withLock_(function () {
     var sh = sheet_();
     ensureIds_(sh);
+    ensureKinds_(sh);
     var row = rowOfId_(sh, id);
     if (row < 0) return out_({ ok: false, error: 'not found' });
     if (trim_(sh.getRange(row, COL_WHO).getValue(), 40) !== who) {
