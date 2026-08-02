@@ -1,0 +1,1047 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>立替・精算｜沖縄 2026.10</title>
+<style>
+  *{box-sizing:border-box}
+  :root{
+    /* 配色とパターンは wishlist.html と同じものを使う（見た目を揃えるため）。
+       あちらを直したときは、ここも同じ値に合わせること */
+    --ai:#1B3E7A; --ai-soft:#E4EAF6;
+    --umi:#0F7360; --umi-soft:#DDEFE9;
+    --bin:#B81E3C; --bin-soft:#FAE6EA;
+    --kin:#8A6304; --kin-soft:#F6EFDE; --kin-line:#C9A44A;
+    --ground:#EDF0F7; --surface:#FFFFFF;
+    --line:#D2DAEA; --line-soft:#E5EAF4;
+    --text:#16202E; --muted:#5A6B82;
+    --band:#12305E; --band-2:#1D4E8E; --band-text:#EEF3FB; --band-muted:#A9C2E4;
+    --grid:#DFE4EF; --axis:#BFC9DB;
+    --obi:#B81E3C; --obi-kasuri:#C9A44A;
+    /* categorical: 藍 / 紅 / 鬱金（validate_palette.js 全チェック PASS・all-pairs） */
+    --m1:#1D4E9E; --m2:#C0203E; --m3:#B07F08;
+    --shadow:0 1px 2px rgba(18,32,54,.06), 0 10px 28px -20px rgba(18,32,54,.55);
+    --font-display:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif;
+    --font-body:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","YuGothic","Meiryo",system-ui,sans-serif;
+    --font-mono:ui-monospace,"SFMono-Regular","Consolas","Courier New",monospace;
+
+    --bingata:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80' width='80' height='80'><g fill='none' stroke='%23ffffff' stroke-width='1' opacity='.15'><path d='M-4 16q12-12 24 0t24 0t24 0t24 0'/><path d='M-4 56q12-12 24 0t24 0t24 0t24 0'/></g><g fill='%23ffffff' opacity='.14'><ellipse cx='20' cy='34.5' rx='2.4' ry='4.4'/><ellipse cx='20' cy='45.5' rx='2.4' ry='4.4'/><ellipse cx='14.5' cy='40' rx='4.4' ry='2.4'/><ellipse cx='25.5' cy='40' rx='4.4' ry='2.4'/><circle cx='20' cy='40' r='1.7'/><ellipse cx='60' cy='74.5' rx='2.4' ry='4.4'/><ellipse cx='54.5' cy='80' rx='4.4' ry='2.4'/><ellipse cx='65.5' cy='80' rx='4.4' ry='2.4'/></g><g fill='none' stroke='%23ffffff' stroke-width='1.2' opacity='.12'><path d='M44 42q7-8 12-1t-3 8q-6 1-5-5'/><path d='M4 74q6-7 11-1'/></g></svg>");
+    --hana:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><g fill='%23000'><ellipse cx='12' cy='5' rx='2.9' ry='4.6'/><ellipse cx='12' cy='19' rx='2.9' ry='4.6'/><ellipse cx='5' cy='12' rx='4.6' ry='2.9'/><ellipse cx='19' cy='12' rx='4.6' ry='2.9'/><circle cx='12' cy='12' r='2'/></g></svg>");
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      --ai:#9CC0EC; --ai-soft:#1B2C46; --umi:#45C4AC; --umi-soft:#0F2E2A;
+      --bin:#F2798C; --bin-soft:#381C24;
+      --kin:#D7AC46; --kin-soft:#2E2617; --kin-line:#8C7130;
+      --obi:#8E1B31; --obi-kasuri:#B08A38;
+      --ground:#0D1826; --surface:#152334;
+      --line:#27384E; --line-soft:#1D2B3D; --text:#E4ECF6; --muted:#93A6BE;
+      --band:#071320; --band-2:#123156; --band-text:#E9F0F9; --band-muted:#A6BEDC;
+      --grid:#233246; --axis:#33465E;
+      --m1:#5590DE; --m2:#E06078; --m3:#B58412;
+      --shadow:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ai:#9CC0EC; --ai-soft:#1B2C46; --umi:#45C4AC; --umi-soft:#0F2E2A;
+    --bin:#F2798C; --bin-soft:#381C24;
+    --kin:#D7AC46; --kin-soft:#2E2617; --kin-line:#8C7130;
+    --obi:#8E1B31; --obi-kasuri:#B08A38;
+    --ground:#0D1826; --surface:#152334;
+    --line:#27384E; --line-soft:#1D2B3D; --text:#E4ECF6; --muted:#93A6BE;
+    --band:#071320; --band-2:#123156; --band-text:#E9F0F9; --band-muted:#A6BEDC;
+    --grid:#233246; --axis:#33465E;
+    --m1:#5590DE; --m2:#E06078; --m3:#B58412;
+    --shadow:0 1px 2px rgba(0,0,0,.45), 0 10px 28px -20px rgba(0,0,0,.9);
+  }
+
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--text);
+    font-family:var(--font-body);font-size:15px;line-height:1.7;overflow-x:hidden}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px 80px}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;text-wrap:balance}
+  a{color:var(--umi)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--umi);outline-offset:3px}
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    font-family:var(--font-mono);color:var(--muted);margin:0}
+
+  /* ---- 藍地に紅型の地紋を敷いた見出し帯 ---- */
+  .band{position:relative;isolation:isolate;overflow:hidden;
+    background:linear-gradient(158deg,var(--band-2) 0%,var(--band) 62%);
+    color:var(--band-text);padding:40px 0 38px;margin-bottom:30px}
+  .band::before{content:"";position:absolute;inset:0;z-index:-1;
+    background:var(--bingata) repeat 0 0/78px 78px}
+  /* 下端の紅型帯（紅地に鬱金の絣）。ページの区切りを兼ねる */
+  .band::after{content:"";position:absolute;left:0;right:0;bottom:0;height:7px;
+    background:
+      repeating-linear-gradient(90deg,var(--obi-kasuri) 0 7px,transparent 7px 14px) 0 0/auto 3px no-repeat,
+      linear-gradient(var(--obi),var(--obi))}
+  .band .wrap{padding-bottom:0}
+  .band .eyebrow{color:var(--band-muted)}
+  .band h1{font-size:clamp(24px,5.4vw,36px);margin:9px 0 6px}
+  .band .sub{color:var(--band-muted);font-size:13.5px;margin:0}
+  .band .navs{margin-top:18px;display:flex;gap:18px;flex-wrap:wrap}
+  .band .back{display:inline-block;color:var(--band-muted);
+    font-size:12.5px;text-decoration:none;border-bottom:1px solid rgba(169,194,228,.45)}
+
+  section.block{margin-bottom:46px}
+  section.block > h2{font-size:21px;margin:4px 0 4px}
+  section.block > .lede{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+  /* 見出しに四弁花を添える。装飾なので読み上げには乗せない */
+  section.block > h2::before{content:"";display:inline-block;width:14px;height:14px;
+    margin-right:9px;vertical-align:-1px;background:var(--kin);
+    -webkit-mask:var(--hana) center/contain no-repeat;
+            mask:var(--hana) center/contain no-repeat}
+
+  /* ---- panel ---- */
+  .panel{position:relative;overflow:hidden;background:var(--surface);
+    border:1px solid var(--line);border-radius:3px;
+    padding:20px;box-shadow:var(--shadow)}
+  .panel.warn{border-left:3px solid var(--bin)}
+  /* 型染めの落款のように、右上に四弁花を薄く置く。読む邪魔にならない濃さに留める */
+  .panel::before{content:"";position:absolute;top:-12px;right:-12px;
+    width:78px;height:78px;background:var(--kin);opacity:.09;pointer-events:none;
+    -webkit-mask:var(--hana) center/contain no-repeat;
+            mask:var(--hana) center/contain no-repeat}
+  .panel h3{font-size:16px;margin-bottom:8px}
+  .panel p{margin:0 0 10px;font-size:13.5px;color:var(--muted)}
+  .panel p:last-child{margin-bottom:0}
+  .panel ol{margin:0;padding-left:1.3em;font-size:13.5px}
+  .panel ol li{margin-bottom:6px}
+  code{font-family:var(--font-mono);font-size:12px;background:var(--ai-soft);
+    padding:1px 5px;border-radius:2px}
+  button{font-family:var(--font-body);font-size:13.5px;font-weight:600;cursor:pointer;
+    background:var(--umi);color:#fff;border:none;padding:9px 18px;border-radius:2px;
+    margin-top:10px;min-height:42px}
+  button.ghost{background:transparent;color:var(--umi);border:1px solid var(--umi)}
+  button.danger{background:transparent;color:var(--bin);border:1px solid var(--bin)}
+  button[disabled]{opacity:.55;cursor:default}
+
+  /* ---- form ---- */
+  .field{margin-bottom:15px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px}
+  .field label .opt{font-weight:400;color:var(--muted);font-family:var(--font-mono);
+    font-size:10.5px;letter-spacing:.06em;margin-left:6px}
+  .field input[type=text]{
+    width:100%;font-family:var(--font-body);font-size:16px;
+    border:1px solid var(--line);border-radius:3px;padding:10px 11px;
+    background:var(--ground);color:var(--text)}
+  .field input.yen{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .field input:focus-visible{outline:2px solid var(--umi);outline-offset:1px}
+  .hint{font-size:11.5px;color:var(--muted);margin:5px 0 0;line-height:1.6}
+  fieldset{border:none;padding:0;margin:0 0 15px;min-width:0}
+  fieldset legend{font-size:12.5px;font-weight:600;padding:0;margin-bottom:6px}
+  .pris,.whos{display:flex;gap:8px;flex-wrap:wrap}
+  .pris label,.whos label{flex:1 1 64px;position:relative;display:block;cursor:pointer;margin:0}
+  .pris input,.whos input{position:absolute;opacity:0;width:0;height:0}
+  .pris span,.whos span{display:block;text-align:center;font-size:12.5px;padding:9px 6px;
+    border:1px solid var(--line);border-radius:3px;background:var(--ground);color:var(--muted)}
+  .pris span b{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em}
+  .whos span{font-weight:600;font-size:14px;padding:11px 4px;min-height:44px;
+    display:flex;align-items:center;justify-content:center}
+  .pris input:checked + span,.whos input:checked + span{border-color:var(--umi);
+    background:var(--umi-soft);color:var(--umi);font-weight:600}
+  .pris input:focus-visible + span,.whos input:focus-visible + span{
+    outline:2px solid var(--umi);outline-offset:2px}
+  .formrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .msg{font-size:12.5px;margin:0;flex:1 1 180px}
+  .msg.ok{color:var(--umi)}
+  .msg.ng{color:var(--bin)}
+
+  /* ---- 個別入力 ---- */
+  .splits{margin:0 0 15px;padding:13px 14px;border:1px solid var(--line);
+    border-radius:3px;background:var(--ground)}
+  .splits h4{margin:0 0 9px;font-size:12.5px;font-family:var(--font-body);font-weight:600}
+  .splits ul{list-style:none;margin:0;padding:0}
+  .splits li{display:flex;align-items:center;gap:10px;padding:5px 0}
+  .splits li .snm{flex:1 1 auto;font-weight:600;font-size:13px}
+  .splits li input{flex:0 0 130px;font-family:var(--font-mono);font-size:16px;
+    text-align:right;border:1px solid var(--line);border-radius:3px;padding:9px 10px;
+    min-height:44px;background:var(--surface);color:var(--text)}
+  .splits .sfoot{margin:9px 0 0;padding-top:9px;border-top:1px solid var(--line-soft);
+    font-size:12px;font-family:var(--font-mono);color:var(--muted);
+    display:flex;justify-content:space-between;gap:10px}
+  .splits .sfoot.ng{color:var(--bin)}
+
+  /* ---- 割り方プレビュー ---- */
+  .preview{margin:0 0 15px;padding:11px 14px;border-left:3px solid var(--umi);
+    background:var(--umi-soft);border-radius:0 3px 3px 0;font-size:12.5px}
+  .preview b{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .preview.ng{border-left-color:var(--bin);background:var(--bin-soft)}
+
+  /* ---- 自分の立替 ---- */
+  .mine{margin:16px 0 0;padding-top:13px;border-top:1px solid var(--line-soft);
+    font-size:12.5px;color:var(--muted)}
+  .mine ul{list-style:none;margin:9px 0 0;padding:0}
+  .mine li{display:flex;align-items:center;gap:9px;padding:7px 0;flex-wrap:wrap;
+    border-bottom:1px solid var(--line-soft)}
+  .mine li:last-child{border-bottom:none}
+  .mine .mname{flex:1 1 140px;min-width:0;color:var(--text);font-weight:600;font-size:13px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mine .mamt{flex:none;font-family:var(--font-mono);font-variant-numeric:tabular-nums;
+    font-size:13px;color:var(--text)}
+  .mine button{flex:none;margin-top:0;padding:9px 12px;font-size:12px;min-height:42px}
+  .mine .msg{margin-top:10px}
+
+  /* ---- stat tiles ---- */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-top:2px solid var(--kin-line);
+    border-radius:3px;overflow:hidden}
+  .tile{background:var(--surface);padding:15px 17px}
+  .tile dt{font-size:11px;letter-spacing:.1em;color:var(--muted);
+    font-family:var(--font-mono);margin:0 0 3px}
+  .tile dd{margin:0;font-size:24px;font-weight:600;line-height:1.2;
+    font-family:var(--font-body);font-variant-numeric:tabular-nums}
+  .tile dd small{font-size:12px;font-weight:400;color:var(--muted);margin-left:5px}
+
+  /* ---- table ---- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;
+    background:var(--surface);-webkit-overflow-scrolling:touch}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  thead th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);
+    font-weight:400;background:var(--ai-soft);border-bottom:1px solid var(--line);
+    position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:none}
+  td.name{font-weight:600}
+  td.num,th.num{text-align:right;font-family:var(--font-mono);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.plus{color:var(--umi);font-weight:600}
+  td.minus{color:var(--bin);font-weight:600}
+  .chip{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:2px;
+    background:var(--ai-soft);color:var(--ai);white-space:nowrap}
+  .chip.me{background:var(--umi-soft);color:var(--umi);font-weight:600}
+  .empty{color:var(--muted);font-size:11px}
+  .who-dot{display:inline-block;width:9px;height:9px;border-radius:50%;
+    margin-right:6px;vertical-align:baseline}
+
+  /* ---- 送金 ---- */
+  .pays{list-style:none;margin:16px 0 0;padding:0}
+  .pays li{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:var(--surface);border:1px solid var(--line);border-radius:3px;
+    padding:14px 16px;margin-bottom:9px;box-shadow:var(--shadow)}
+  .pays .pfrom,.pays .pto{font-weight:600;font-size:15px}
+  .pays .parrow{color:var(--muted);font-family:var(--font-mono)}
+  .pays .pamt{margin-left:auto;font-family:var(--font-mono);font-size:17px;
+    font-variant-numeric:tabular-nums;font-weight:600;color:var(--umi)}
+  .pays li.done{border-left:3px solid var(--umi)}
+
+  .note{font-size:12px;color:var(--muted);margin-top:10px}
+  footer{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12px}
+  .hide{display:none !important}
+
+  @media (max-width:560px){
+    .tile dd{font-size:21px}
+    /* 指で押すので、どのボタンも44px以上を確保する（特に「消す」） */
+    button,.mine button{min-height:44px}
+    .mine li{padding:9px 0}
+    .mine .mname{flex:1 1 100%}
+    .pays .pamt{margin-left:0;width:100%}
+  }
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="wrap">
+    <p class="eyebrow">Settle Up</p>
+    <h1>立替・精算</h1>
+    <p class="sub">誰かが先に払ったぶんをここに出しておくと、最後に「誰が誰にいくら渡すか」を出します</p>
+    <nav class="navs">
+      <a class="back" href="./">← 旅程表に戻る</a>
+      <a class="back" href="wishlist.html">行きたいスポットの集計 →</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="block" id="formblock">
+    <p class="eyebrow">Add</p>
+    <h2>立替を出す</h2>
+    <p class="lede">払った人・金額・その支出を割る人を入れて送るだけ。あとから直せます。</p>
+
+    <div class="panel" id="formpanel">
+      <form id="eform" novalidate>
+        <fieldset>
+          <legend>あなたは</legend>
+          <div class="whos" id="whobox">
+            <label><input type="radio" name="who" value="Otsu"><span>Otsu</span></label>
+            <label><input type="radio" name="who" value="Sugi"><span>Sugi</span></label>
+            <label><input type="radio" name="who" value="Runto"><span>Runto</span></label>
+          </div>
+          <p class="hint">一度選ぶと次回から選ばれた状態になります（この端末にだけ残ります）。自分で出した立替だけ、あとから直したり消したりできます。</p>
+        </fieldset>
+
+        <div class="field">
+          <label for="f-title">なにに使ったか</label>
+          <input id="f-title" type="text" maxlength="60" placeholder="レンタカー代">
+        </div>
+
+        <div class="field">
+          <label for="f-amount">金額（合計）</label>
+          <input id="f-amount" class="yen" type="text" inputmode="numeric" maxlength="12" placeholder="12000">
+          <p class="hint">円。整数だけです（小数は扱いません）。</p>
+        </div>
+
+        <fieldset>
+          <legend>立替えた人</legend>
+          <div class="whos" id="payerbox">
+            <label><input type="radio" name="payer" value="Otsu"><span>Otsu</span></label>
+            <label><input type="radio" name="payer" value="Sugi"><span>Sugi</span></label>
+            <label><input type="radio" name="payer" value="Runto"><span>Runto</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>この支出を割る人</legend>
+          <div class="whos" id="targetbox">
+            <label><input type="checkbox" name="target" value="Otsu" checked><span>Otsu</span></label>
+            <label><input type="checkbox" name="target" value="Sugi" checked><span>Sugi</span></label>
+            <label><input type="checkbox" name="target" value="Runto" checked><span>Runto</span></label>
+          </div>
+          <p class="hint">初期値は3人全員。ひとりぶんだけの立替なら、その人だけを選んでください。</p>
+        </fieldset>
+
+        <fieldset>
+          <legend>割り方</legend>
+          <div class="pris" id="modebox">
+            <label><input type="radio" name="mode" value="均等" checked><span><b>均等割</b>頭割りにする</span></label>
+            <label><input type="radio" name="mode" value="個別"><span><b>個別入力</b>ひとりずつ決める</span></label>
+          </div>
+        </fieldset>
+
+        <div class="splits hide" id="splitbox">
+          <h4>ひとりずつの金額</h4>
+          <ul id="splitlist"></ul>
+          <p class="sfoot" id="splitfoot"><span>合計</span><span id="splitsum">0</span></p>
+        </div>
+
+        <p class="preview" id="f-preview"></p>
+
+        <div class="formrow">
+          <button type="submit" id="f-send">この内容で出す</button>
+          <button type="button" class="ghost hide" id="f-cancel">やめる</button>
+          <p class="msg" id="f-msg"></p>
+        </div>
+      </form>
+
+      <div class="mine hide" id="mine">
+        <span id="minehead"></span>
+        <ul id="minelist"></ul>
+        <p class="msg" id="m-msg"></p>
+      </div>
+    </div>
+  </section>
+
+  <div id="status"></div>
+
+  <div id="content" class="hide">
+
+    <section class="block">
+      <p class="eyebrow">Expenses</p>
+      <h2>出ている立替</h2>
+      <p class="lede" id="updated"></p>
+      <dl class="tiles" id="tiles"></dl>
+      <div class="tablewrap" style="margin-top:18px">
+        <table id="exptable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note">「負担」は、その支出であなたが持つぶんです。均等割で割り切れないぶんは立替えた人に寄せています（例：1000円を3人なら 334 / 333 / 333 で、334が立替えた人）。</p>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow">Balance</p>
+      <h2>いまの過不足</h2>
+      <p class="lede">払った合計から、負担すべき合計を引いた差です。プラスなら受け取る側、マイナスなら払う側になります。</p>
+      <div class="tablewrap">
+        <table id="baltable">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow">Settle</p>
+      <h2>精算する</h2>
+      <p class="lede">送金の回数がいちばん少なくなる組み合わせを出します。押すとシートを読み直してから計算するので、他の人が出したぶんも入ります。押しても記録は残りません（何度でも出し直せます）。</p>
+      <button type="button" id="settlebtn">精算の内訳を出す</button>
+      <div id="settleout"></div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>金額は円の整数で扱います。均等割で割り切れないぶんは立替えた人の負担に寄せているため、頭割りの金額が1〜2円ずれることがあります。精算の結果はその場で計算して出しているだけで、「精算済み」の記録は持ちません。渡し終えたら、その立替を消すか、そのまま残しておいてください。</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ── 設定 ────────────────────────────────────────────
+  // wishlist.html と同じ Apps Script ウェブアプリ。立替は2枚目のシートを使う
+  var API_URL = "https://script.google.com/macros/s/AKfycbxoPCHPlRPAf5NAQ9E1nqMKMj0UXoQkZJrwQQ6KPglmDgtoKmFNLgv7Vt34iVjYrJGG/exec";
+
+  // apps-script.gs の TOKEN と同じ文字列。いたずら投稿を止めるだけの合言葉
+  var TOKEN = "okinawa2026-3nin-2f9a41c7";
+
+  var MEMBERS = ["Otsu", "Sugi", "Runto"];
+  var MEMBER_VARS = ["--m1", "--m2", "--m3"];
+  // 提出者の選択は wishlist.html と共通。片方で選べばもう片方でも選ばれている
+  var WHO_KEY = "okinawa2026.who";
+  // ────────────────────────────────────────────────────
+
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+  var yen = function(n){ return "¥" + Number(n).toLocaleString("ja-JP"); };
+
+  function store(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+  function load(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }
+
+  /* ══════ 計算 ══════════════════════════════════════════
+     ここから3つの関数（parseYen / sharesOf / settle）が計算の本体。
+     円は整数で扱い、小数を作らない。
+     ════════════════════════════════════════════════════ */
+
+  // 金額を整数（円）にする。全角数字・カンマ・「円」「¥」は落とす。
+  // 数字として読めなければ null（小数は受け付けない）
+  function parseYen(v){
+    if(v==null) return null;
+    var s = String(v).replace(/[０-９]/g, function(c){
+      return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+    }).replace(/[,\s￥¥円]/g, "");
+    if(!/^-?\d+$/.test(s)) return null;
+    var n = parseInt(s, 10);
+    return isNaN(n) ? null : n;
+  }
+
+  // 支出1件を、メンバーごとの負担額に割る。
+  //   個別入力 … 入っている金額をそのまま使う（合計＝金額であることは投稿時に検査済み）
+  //   均等割   … 対象人数で割った商を全員に配り、割り切れないぶん（0〜人数-1円）は
+  //              立替えた人の負担に寄せる。例：1000円を3人 → 立替者334 / 他333・333。
+  //              立替えた人が対象に入っていないときは、対象の先頭（MEMBERS の並び順）に寄せる
+  function sharesOf(exp){
+    var out = {}, i;
+    if(exp.mode === "個別"){
+      for(i=0;i<exp.targets.length;i++){
+        out[exp.targets[i]] = exp.custom[exp.targets[i]] || 0;
+      }
+      return out;
+    }
+    var n = exp.targets.length;
+    if(!n) return out;
+    var base = Math.floor(exp.amount / n);
+    var rem = exp.amount - base * n;
+    for(i=0;i<exp.targets.length;i++) out[exp.targets[i]] = base;
+    var head = exp.targets.indexOf(exp.payer) >= 0 ? exp.payer : exp.targets[0];
+    out[head] += rem;
+    return out;
+  }
+
+  // 支払った合計・負担すべき合計・差引と、送金の組み合わせを出す。
+  // 送金は「もらう人」と「払う人」を金額の大きい順に突き合わせる貪欲法で、
+  // 送金の回数が最小に近くなる（3人なら常に最小）
+  function settle(exps, members){
+    var paid = {}, owe = {}, net = {}, i, m;
+    for(i=0;i<members.length;i++){ paid[members[i]] = 0; owe[members[i]] = 0; }
+
+    for(i=0;i<exps.length;i++){
+      var e = exps[i];
+      paid[e.payer] = (paid[e.payer] || 0) + e.amount;
+      var s = sharesOf(e);
+      for(m in s){ if(Object.prototype.hasOwnProperty.call(s,m)) owe[m] = (owe[m] || 0) + s[m]; }
+    }
+    for(i=0;i<members.length;i++) net[members[i]] = paid[members[i]] - owe[members[i]];
+
+    var cred = [], debt = [];
+    for(i=0;i<members.length;i++){
+      var v = net[members[i]];
+      if(v > 0) cred.push({who:members[i], v:v});
+      else if(v < 0) debt.push({who:members[i], v:-v});
+    }
+    cred.sort(function(a,b){ return b.v - a.v; });
+    debt.sort(function(a,b){ return b.v - a.v; });
+
+    var tx = [], ci = 0, di = 0, guard = 0;
+    while(ci < cred.length && di < debt.length && guard++ < 100){
+      var x = Math.min(cred[ci].v, debt[di].v);
+      if(x > 0) tx.push({from:debt[di].who, to:cred[ci].who, amount:x});
+      cred[ci].v -= x; debt[di].v -= x;
+      if(cred[ci].v === 0) ci++;
+      if(debt[di].v === 0) di++;
+    }
+    return {paid:paid, owe:owe, net:net, tx:tx};
+  }
+
+  // 検証から呼べるようにしておく（本番の動きには関わらない）
+  window.__seisan = {parseYen:parseYen, sharesOf:sharesOf, settle:settle};
+
+  /* ══════ シートの読み取り ═════════════════════════════ */
+
+  function toExpenses(rows){
+    if(!rows || !rows.length) return [];
+    var head = rows[0].map(function(h){ return String(h||"").trim(); });
+    var idx = function(names){
+      for(var n=0;n<names.length;n++){ var i=head.indexOf(names[n]); if(i>=0) return i; }
+      return -1;
+    };
+    var c = {
+      title: idx(["タイトル","内容","なに"]),
+      amount: idx(["金額"]),
+      payer: idx(["立替者","立替えた人"]),
+      mode: idx(["割り方"]),
+      targets: idx(["対象メンバー","対象"]),
+      custom: idx(["個別内訳","内訳"]),
+      poster: idx(["投稿者"]),
+      id: idx(["ID"]),
+      at: idx(["登録日時","日時"])
+    };
+    var cell = function(row, i){ return i>=0 ? String(row[i]==null?"":row[i]).trim() : ""; };
+
+    var out = [];
+    for(var r=1;r<rows.length;r++){
+      var row = rows[r];
+      var amount = parseYen(cell(row, c.amount));
+      var payer = cell(row, c.payer);
+      if(amount == null || MEMBERS.indexOf(payer) < 0) continue;
+
+      var mode = cell(row, c.mode) === "個別" ? "個別" : "均等";
+      var targets = cell(row, c.targets).split(",").map(function(s){ return s.trim(); })
+        .filter(function(s){ return MEMBERS.indexOf(s) >= 0; });
+      // MEMBERS の並び順に揃える（端数の寄せ先を決める都合で順番が意味を持つ）
+      targets = MEMBERS.filter(function(m){ return targets.indexOf(m) >= 0; });
+
+      var custom = {};
+      cell(row, c.custom).split(",").forEach(function(p){
+        var kv = p.split(":");
+        if(kv.length === 2){
+          var v = parseYen(kv[1]);
+          if(v != null) custom[kv[0].trim()] = v;
+        }
+      });
+      if(!targets.length){
+        // 対象が空の行は、内訳があればそこから、無ければ全員として扱う
+        var ks = Object.keys(custom).filter(function(k){ return MEMBERS.indexOf(k)>=0; });
+        targets = ks.length ? MEMBERS.filter(function(m){ return ks.indexOf(m)>=0; }) : MEMBERS.slice();
+      }
+      if(mode === "個別"){
+        var sum = 0;
+        for(var t=0;t<targets.length;t++) sum += (custom[targets[t]] || 0);
+        // 手でシートを直して合計が合わなくなっている行は、均等割として扱う
+        if(sum !== amount) mode = "均等";
+      }
+
+      out.push({
+        id: cell(row, c.id),
+        title: cell(row, c.title) || "（無題）",
+        amount: amount, payer: payer, mode: mode,
+        targets: targets, custom: custom,
+        poster: cell(row, c.poster) || payer,
+        at: cell(row, c.at)
+      });
+    }
+    return out;
+  }
+
+  // Apps Script は別オリジンなので、読み取りは JSONP で取りに行く
+  // （通常の fetch だとリダイレクト先で CORS に引っかかることがある）
+  function jsonp(url, timeoutMs){
+    return new Promise(function(resolve, reject){
+      var name = "sscb_" + Math.random().toString(36).slice(2);
+      var s = document.createElement("script");
+      var timer = setTimeout(function(){ done(); reject(new Error("時間内に応答がありません")); }, timeoutMs||15000);
+      function done(){
+        clearTimeout(timer);
+        try{ delete window[name]; }catch(e){ window[name] = undefined; }
+        if(s.parentNode) s.parentNode.removeChild(s);
+      }
+      window[name] = function(data){ done(); resolve(data); };
+      s.onerror = function(){ done(); reject(new Error("接続できません")); };
+      s.src = url + (url.indexOf("?")<0 ? "?" : "&") + "callback=" + name;
+      document.head.appendChild(s);
+    });
+  }
+
+  function send(obj){
+    obj.token = TOKEN;
+    var payload = JSON.stringify(obj);
+    // text/plain にすると preflight が飛ばないぶん通りやすい
+    var opts = {method:"POST", body:payload,
+                headers:{"Content-Type":"text/plain;charset=utf-8"}};
+    return fetch(API_URL, opts)
+      .then(function(r){ return r.json(); })
+      .then(function(j){
+        if(!j || !j.ok) throw new Error(errText(j && j.error));
+        return j;
+      })
+      .catch(function(err){
+        // CORS で応答を読めない環境向けの保険。送信自体は届くので、
+        // 結果を確認できないことだけ呼び出し側に伝える
+        return fetch(API_URL, {method:"POST", mode:"no-cors", body:payload,
+                               headers:{"Content-Type":"text/plain;charset=utf-8"}})
+          .then(function(){ return {ok:true, unverified:true}; })
+          .catch(function(){ throw err; });
+      });
+  }
+
+  function errText(code){
+    var map = {
+      "token":"合言葉が合いません", "title":"タイトルが空です",
+      "amount":"金額が正しくありません", "payer":"立替えた人が正しくありません",
+      "who":"あなたが選ばれていません", "mode":"割り方が正しくありません",
+      "targets":"割る人がひとりも選ばれていません",
+      "custom":"個別の金額が正しくありません",
+      "custom sum":"個別の金額の合計が、金額と合っていません",
+      "not found":"その立替が見つかりません", "not yours":"自分が出した立替ではありません"
+    };
+    return map[code] || (code ? String(code) : "拒否されました");
+  }
+
+  /* ══════ 状態 ══════════════════════════════════════════ */
+
+  var EXPS = [];        // シートから読んだ立替の一覧
+  var EDIT_ID = "";     // 修正中の立替のID。空なら新規
+
+  function currentWho(){
+    var el = document.querySelector('input[name="who"]:checked');
+    return el ? el.value : "";
+  }
+  function currentPayer(){
+    var el = document.querySelector('input[name="payer"]:checked');
+    return el ? el.value : "";
+  }
+  function currentTargets(){
+    var got = [];
+    [].forEach.call(document.querySelectorAll('input[name="target"]:checked'),
+      function(el){ got.push(el.value); });
+    return MEMBERS.filter(function(m){ return got.indexOf(m) >= 0; });
+  }
+  function currentMode(){
+    var el = document.querySelector('input[name="mode"]:checked');
+    return el ? el.value : "均等";
+  }
+  function memberColor(m){
+    var i = MEMBERS.indexOf(m);
+    return "var(" + MEMBER_VARS[(i<0?0:i) % 3] + ")";
+  }
+  function dot(m){
+    return '<i class="who-dot" style="background:' + memberColor(m) + '"></i>';
+  }
+
+  /* ══════ フォーム ══════════════════════════════════════ */
+
+  // 個別入力の欄を、いま選ばれている対象メンバーにあわせて作り直す。
+  // 既に入っている数字は消さない
+  function renderSplits(){
+    var box = $("splitbox"), list = $("splitlist");
+    if(currentMode() !== "個別"){ box.classList.add("hide"); return; }
+    box.classList.remove("hide");
+
+    var keep = {};
+    [].forEach.call(list.querySelectorAll("input"), function(el){
+      keep[el.getAttribute("data-who")] = el.value;
+    });
+    var targets = currentTargets();
+    list.innerHTML = targets.map(function(m){
+      return '<li><span class="snm">' + dot(m) + esc(m) + '</span>' +
+        '<input type="text" inputmode="numeric" maxlength="12" data-who="' + esc(m) + '" ' +
+        'aria-label="' + esc(m) + ' の金額" value="' + esc(keep[m] || "") + '" placeholder="0"></li>';
+    }).join("");
+  }
+
+  function splitValues(){
+    var out = {}, bad = false, sum = 0;
+    [].forEach.call($("splitlist").querySelectorAll("input"), function(el){
+      var raw = el.value.trim();
+      var v = raw === "" ? 0 : parseYen(raw);
+      if(v == null || v < 0){ bad = true; v = 0; }
+      out[el.getAttribute("data-who")] = v;
+      sum += v;
+    });
+    return {values:out, sum:sum, bad:bad};
+  }
+
+  // フォームの中身から、いま作られる立替を組み立てる。
+  // 使えない状態なら {error:...} を返す
+  function draftExpense(){
+    var who = currentWho();
+    var title = $("f-title").value.trim();
+    var amount = parseYen($("f-amount").value.trim());
+    var payer = currentPayer();
+    var targets = currentTargets();
+    var mode = currentMode();
+
+    if(!who) return {error:"あなたが誰かを選んでください。"};
+    if(!title) return {error:"なにに使ったかを入れてください。"};
+    if($("f-amount").value.trim() === "") return {error:"金額を入れてください。"};
+    if(amount == null) return {error:"金額は数字（円）で入れてください。"};
+    if(amount < 1) return {error:"金額は1円以上にしてください。"};
+    if(amount > 9999999) return {error:"金額が大きすぎます。桁を確かめてください。"};
+    if(!payer) return {error:"立替えた人を選んでください。"};
+    if(!targets.length) return {error:"この支出を割る人を、ひとり以上選んでください。"};
+
+    var custom = {};
+    if(mode === "個別"){
+      var sv = splitValues();
+      if(sv.bad) return {error:"個別の金額は数字（円）で入れてください。"};
+      if(sv.sum !== amount){
+        return {error:"個別の金額の合計が " + yen(sv.sum) + " で、金額の " + yen(amount) +
+          " と合っていません（差 " + yen(Math.abs(amount - sv.sum)) + "）。"};
+      }
+      custom = sv.values;
+    }
+    return {exp:{id:EDIT_ID, title:title, amount:amount, payer:payer, mode:mode,
+                 targets:targets, custom:custom, poster:who}};
+  }
+
+  // 入力のたびに、いまの割り方の結果を出す。送信前に気づけるようにする
+  function updatePreview(){
+    var box = $("f-preview"), foot = $("splitfoot");
+
+    if(currentMode() === "個別"){
+      var sv = splitValues();
+      var amt = parseYen($("f-amount").value.trim());
+      var okSum = (amt != null && sv.sum === amt);
+      $("splitsum").textContent = yen(sv.sum) + (amt != null ? " / " + yen(amt) : "");
+      foot.className = "sfoot" + (okSum ? "" : " ng");
+    }
+
+    var d = draftExpense();
+    if(d.error){
+      box.className = "preview ng";
+      box.textContent = d.error;
+      return;
+    }
+    var s = sharesOf(d.exp);
+    var parts = d.exp.targets.map(function(m){
+      return esc(m) + " <b>" + yen(s[m]) + "</b>" + (m === d.exp.payer ? "（立替）" : "");
+    });
+    var rem = d.exp.mode === "均等" && (d.exp.amount % d.exp.targets.length !== 0);
+    box.className = "preview";
+    box.innerHTML = "この内容だと " + parts.join(" ／ ") +
+      (rem ? ' <span class="empty">割り切れないぶんは立替えた人に寄せています</span>' : "");
+  }
+
+  function formMsg(text, bad){
+    var el = $("f-msg");
+    el.className = "msg" + (bad ? " ng" : text ? " ok" : "");
+    el.textContent = text || "";
+  }
+  function mineMsg(text, bad){
+    var el = $("m-msg");
+    el.className = "msg" + (bad ? " ng" : text ? " ok" : "");
+    el.textContent = text || "";
+  }
+
+  function resetForm(){
+    EDIT_ID = "";
+    $("f-title").value = "";
+    $("f-amount").value = "";
+    var who = currentWho();
+    if(who){
+      var p = document.querySelector('input[name="payer"][value="' + who + '"]');
+      if(p) p.checked = true;
+    }
+    [].forEach.call(document.querySelectorAll('input[name="target"]'),
+      function(el){ el.checked = true; });
+    document.querySelector('input[name="mode"][value="均等"]').checked = true;
+    $("splitlist").innerHTML = "";
+    renderSplits();
+    $("f-send").textContent = "この内容で出す";
+    $("f-cancel").classList.add("hide");
+    updatePreview();
+  }
+
+  // 修正ボタンから、既存の立替をフォームに戻す
+  function editExpense(id){
+    var e = null;
+    for(var i=0;i<EXPS.length;i++) if(EXPS[i].id === id) e = EXPS[i];
+    if(!e) return;
+    EDIT_ID = id;
+    $("f-title").value = e.title;
+    $("f-amount").value = String(e.amount);
+    var p = document.querySelector('input[name="payer"][value="' + e.payer + '"]');
+    if(p) p.checked = true;
+    [].forEach.call(document.querySelectorAll('input[name="target"]'), function(el){
+      el.checked = e.targets.indexOf(el.value) >= 0;
+    });
+    document.querySelector('input[name="mode"][value="' + e.mode + '"]').checked = true;
+    $("splitlist").innerHTML = "";
+    renderSplits();
+    if(e.mode === "個別"){
+      [].forEach.call($("splitlist").querySelectorAll("input"), function(el){
+        var v = e.custom[el.getAttribute("data-who")];
+        el.value = (v == null ? "" : String(v));
+      });
+    }
+    $("f-send").textContent = "この内容に直す";
+    $("f-cancel").classList.remove("hide");
+    formMsg("");
+    mineMsg("");
+    updatePreview();
+    $("formblock").scrollIntoView({behavior:"smooth", block:"start"});
+  }
+
+  function bindForm(){
+    var form = $("eform");
+
+    var saved = load(WHO_KEY);
+    if(saved){
+      var pre = form.querySelector('input[name="who"][value="' + saved.replace(/"/g,"") + '"]');
+      if(pre) pre.checked = true;
+    }
+    resetForm();
+
+    form.addEventListener("change", function(ev){
+      var n = ev.target.name;
+      if(n === "who"){
+        store(WHO_KEY, ev.target.value);
+        // 立替えた人がまだ触られていない新規入力なら、自分に合わせる
+        if(!EDIT_ID){
+          var p = document.querySelector('input[name="payer"][value="' + ev.target.value + '"]');
+          if(p) p.checked = true;
+        }
+        mineMsg("");
+        showMine();
+      }
+      if(n === "mode" || n === "target") renderSplits();
+      updatePreview();
+    });
+    form.addEventListener("input", function(){ updatePreview(); });
+
+    $("f-cancel").addEventListener("click", function(){
+      resetForm();
+      formMsg("");
+    });
+
+    form.addEventListener("submit", function(ev){
+      ev.preventDefault();
+      var d = draftExpense();
+      if(d.error){ formMsg(d.error, true); return; }
+
+      var e = d.exp;
+      var payload = {
+        action: EDIT_ID ? "exp_update" : "exp_add",
+        id: EDIT_ID || undefined,
+        who: e.poster, title: e.title, amount: e.amount, payer: e.payer,
+        mode: e.mode, targets: e.targets, custom: e.custom
+      };
+      var editing = !!EDIT_ID;
+
+      $("f-send").disabled = true;
+      formMsg(editing ? "直しています…" : "送信しています…");
+
+      send(payload)
+        .then(function(res){
+          store(WHO_KEY, e.poster);
+          resetForm();
+          formMsg(res.unverified
+            ? "送信しました（このブラウザでは結果を確認できないため、下の一覧に出るか確かめてください）。"
+            : (editing ? "直しました。" : "出しました。続けて出せます。"));
+          reload();
+        })
+        .catch(function(err){ formMsg((editing?"直せませんでした（":"送信できませんでした（") + err.message + "）。", true); })
+        .then(function(){ $("f-send").disabled = false; });
+    });
+  }
+
+  /* ══════ 自分の立替（修正・削除） ══════════════════════ */
+
+  function showMine(){
+    var who = currentWho(), box = $("mine");
+    var mine = who ? EXPS.filter(function(e){ return e.poster === who && e.id; }) : [];
+    if(!mine.length){ box.classList.add("hide"); return; }
+    box.classList.remove("hide");
+    $("minehead").textContent = who + " が出した立替 " + mine.length + "件 — 直す・消すができます";
+    $("minelist").innerHTML = mine.map(function(e){
+      return '<li data-id="' + esc(e.id) + '">' +
+        '<span class="mname">' + esc(e.title) + '</span>' +
+        '<span class="mamt">' + yen(e.amount) + '</span>' +
+        '<button type="button" class="ghost medit">直す</button>' +
+        '<button type="button" class="danger mdel">消す</button>' +
+      '</li>';
+    }).join("");
+  }
+
+  function bindMine(){
+    $("minelist").addEventListener("click", function(ev){
+      var t = ev.target;
+      var li = t.closest ? t.closest("li") : null;
+      if(!li) return;
+      var id = li.getAttribute("data-id");
+
+      if(t.closest(".medit")){ editExpense(id); return; }
+
+      var btn = t.closest(".mdel");
+      if(!btn) return;
+      var name = li.querySelector(".mname").textContent;
+      if(!window.confirm("「" + name + "」を消します。よろしいですか？")) return;
+      btn.disabled = true;
+      mineMsg("消しています…");
+      send({action:"exp_remove", id:id, who:currentWho()})
+        .then(function(){
+          mineMsg("消しました。");
+          if(EDIT_ID === id) resetForm();
+          reload();
+        })
+        .catch(function(e){
+          mineMsg("消せませんでした（" + e.message + "）。", true);
+          btn.disabled = false;
+        });
+    });
+  }
+
+  /* ══════ 描画 ══════════════════════════════════════════ */
+
+  function render(exps){
+    EXPS = exps;
+    showMine();
+
+    if(!exps.length){
+      $("content").classList.add("hide");
+      $("status").innerHTML = '<div class="panel" style="margin-bottom:30px">' +
+        '<h3>まだ立替が1件も出ていません</h3>' +
+        '<p>上のフォームから1件出すと、ここに一覧と精算が出ます。' +
+        'レンタカー代・宿代・ガソリン代など、誰かが先に払ったものを入れてください。</p>' +
+        '<p style="margin:0">誰も立替えていない（その場で割り勘した）ぶんは、入れなくて大丈夫です。</p></div>';
+      $("settleout").innerHTML = "";
+      return;
+    }
+    $("status").innerHTML = "";
+    $("content").classList.remove("hide");
+
+    var me = currentWho();
+    var res = settle(exps, MEMBERS);
+    var total = 0;
+    exps.forEach(function(e){ total += e.amount; });
+
+    // ---- tiles ----
+    var tiles = [
+      ["立替の件数", String(exps.length), "件"],
+      ["立替の合計", yen(total), ""],
+      ["ひとり平均", yen(Math.round(total / MEMBERS.length)), ""],
+      ["送金の回数", String(res.tx.length), "回"]
+    ];
+    $("tiles").innerHTML = tiles.map(function(t){
+      return '<div class="tile"><dt>' + esc(t[0]) + '</dt><dd>' + esc(t[1]) +
+        (t[2] ? '<small>' + esc(t[2]) + '</small>' : '') + '</dd></div>';
+    }).join("");
+
+    // ---- 支出一覧 ----
+    $("exptable").tHead.innerHTML =
+      '<tr><th>なに</th><th class="num">金額</th><th>立替</th><th>割り方</th>' +
+      '<th>割る人</th><th class="num">あなたの負担</th></tr>';
+    $("exptable").tBodies[0].innerHTML = exps.map(function(e){
+      var s = sharesOf(e);
+      var mineAmt = (me && s[me] != null) ? yen(s[me]) : "—";
+      return '<tr>' +
+        '<td class="name">' + esc(e.title) +
+          (me && e.poster === me ? ' <span class="chip me">自分が出した</span>' : '') +
+          (e.at ? '<br><span class="empty">' + esc(e.at) + '</span>' : '') + '</td>' +
+        '<td class="num">' + yen(e.amount) + '</td>' +
+        '<td>' + dot(e.payer) + esc(e.payer) + '</td>' +
+        '<td><span class="chip">' + esc(e.mode === "個別" ? "個別" : "均等") + '</span></td>' +
+        '<td>' + e.targets.map(function(m){
+            return '<span class="empty" style="color:var(--text)">' + esc(m) + ' ' + yen(s[m]) + '</span>';
+          }).join("<br>") + '</td>' +
+        '<td class="num">' + mineAmt + '</td>' +
+      '</tr>';
+    }).join("");
+
+    // ---- 過不足 ----
+    $("baltable").tHead.innerHTML =
+      '<tr><th>メンバー</th><th class="num">払った</th><th class="num">負担すべき</th><th class="num">差引</th></tr>';
+    $("baltable").tBodies[0].innerHTML = MEMBERS.map(function(m){
+      var n = res.net[m];
+      var cls = n > 0 ? "num plus" : n < 0 ? "num minus" : "num";
+      var tail = n > 0 ? "（もらう）" : n < 0 ? "（払う）" : "";
+      return '<tr>' +
+        '<td class="name">' + dot(m) + esc(m) +
+          (m === me ? ' <span class="chip me">あなた</span>' : '') + '</td>' +
+        '<td class="num">' + yen(res.paid[m]) + '</td>' +
+        '<td class="num">' + yen(res.owe[m]) + '</td>' +
+        '<td class="' + cls + '">' + (n > 0 ? "+" : "") + yen(n).replace("¥-", "-¥") + tail + '</td>' +
+      '</tr>';
+    }).join("");
+
+    $("updated").textContent = "読み込み時刻：" + new Date().toLocaleString("ja-JP");
+
+    // 一度でも精算を出していたら、内容が変わったぶんを出し直す
+    if($("settleout").innerHTML) showSettle();
+  }
+
+  function showSettle(){
+    var out = $("settleout");
+    if(!EXPS.length){
+      out.innerHTML = '<p class="note">まだ立替が出ていないので、精算するものがありません。</p>';
+      return;
+    }
+    var res = settle(EXPS, MEMBERS);
+    if(!res.tx.length){
+      out.innerHTML = '<p class="note" style="font-size:13.5px;color:var(--umi)">' +
+        'ぴったり合っています。動かすお金はありません。</p>';
+      return;
+    }
+    out.innerHTML = '<ul class="pays">' + res.tx.map(function(t){
+      return '<li class="done"><span class="pfrom">' + dot(t.from) + esc(t.from) + '</span>' +
+        '<span class="parrow">→</span>' +
+        '<span class="pto">' + dot(t.to) + esc(t.to) + '</span>' +
+        '<span class="pamt">' + yen(t.amount) + '</span></li>';
+    }).join("") + '</ul>' +
+    '<p class="note">この ' + res.tx.length + ' 回のやりとりで、全員の過不足が 0 になります。' +
+    '計算しただけで、精算が済んだ記録は残しません。</p>';
+  }
+
+  /* ══════ 読み込み ══════════════════════════════════════ */
+
+  function loadData(quiet){
+    if(!quiet){
+      $("status").innerHTML = '<div class="panel"><p style="margin:0">立替を読み込んでいます…</p></div>';
+    }
+    return jsonp(API_URL + "?what=expense")
+      .then(function(j){
+        if(!j || !j.ok) throw new Error(errText(j && j.error));
+        render(toExpenses(j.rows || []));
+      })
+      .catch(function(e){
+        $("content").classList.add("hide");
+        $("status").innerHTML = '<div class="panel warn" style="margin-bottom:30px">' +
+          '<h3>立替シートにつながりませんでした</h3>' +
+          '<p>' + esc(e.message) + '</p>' +
+          '<p style="margin:0">スプレッドシートの Apps Script に <code>apps-script.gs</code> の中身を貼り直して、' +
+          '「デプロイを管理 → 鉛筆 → 新バージョン」で更新すると直ります。' +
+          'そのあとこのページを開き直してください。</p></div>';
+      });
+  }
+
+  function reload(){ return loadData(true); }
+
+  // 精算はいちばん間違えたくないところなので、押されたら必ずシートを読み直してから出す。
+  // 他の人がさっき出したぶんが抜けたまま計算されるのを防ぐ
+  function settleNow(){
+    var btn = $("settlebtn");
+    btn.disabled = true;
+    $("settleout").innerHTML = '<p class="note">最新の立替を読み込んでいます…</p>';
+    reload()
+      .then(function(){ showSettle(); })
+      .catch(function(){ showSettle(); })
+      .then(function(){ btn.disabled = false; });
+  }
+
+  bindForm();
+  bindMine();
+  $("settlebtn").addEventListener("click", settleNow);
+  loadData(false);
+})();
+</script>
+</body>
+</html>

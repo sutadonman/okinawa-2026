@@ -10,6 +10,12 @@
  * 修正と取り下げは、行のIDと提出者名の両方が一致したときだけ通す。
  * ログインを求めない代わりの簡易な持ち主チェックなので、
  * 「他人のふりをすれば消せる」点は許容している（身内3人での運用のため）。
+ *
+ * 同じスプレッドシートの2枚目のシートを seisan.html（立替・精算）が使う。
+ * 1枚目（スポット希望リスト）とは読み書きの経路を完全に分けてあり、
+ * 立替まわりの action（exp_*）は1枚目に一切触れない。
+ *   doGet?what=expense … 立替シートの中身を返す
+ *   doPost exp_add / exp_update / exp_remove … 立替の追加・修正・削除
  */
 
 // ── 設定 ─────────────────────────────────────────────
@@ -37,6 +43,20 @@ var KIND_DEFAULT = '観光';
 
 // 一度に受け付ける最大件数（取りこぼしより暴走を止めることを優先）
 var MAX_ITEMS = 20;
+
+// ── 立替・精算（2枚目のシート） ───────────────────────
+// 同じスプレッドシート内に名前で作る。無ければ末尾に足すので、
+// 1枚目のスポット希望リストは動かない。
+var EXPENSE_SHEET = '立替・精算';
+var EXP_HEADERS = ['タイトル', '金額', '立替者', '割り方', '対象メンバー', '個別内訳', '投稿者', 'ID', '登録日時'];
+var EXP_TITLE = 1, EXP_AMOUNT = 2, EXP_PAYER = 3, EXP_MODE = 4, EXP_TARGETS = 5,
+    EXP_CUSTOM = 6, EXP_POSTER = 7, EXP_ID = 8, EXP_AT = 9;
+
+// 割り方。均等＝対象メンバーで等分、個別＝メンバーごとに金額を直接指定
+var EXP_MODES = ['均等', '個別'];
+
+// 1件あたりの上限。桁の打ち間違いを弾くためだけの値
+var MAX_AMOUNT = 9999999;
 // ─────────────────────────────────────────────────────
 
 
@@ -268,6 +288,22 @@ function doGet(e) {
     }, cb);
   }
 
+  // 立替・精算ページ（seisan.html）はこちら。2枚目のシートだけを読む
+  if (e && e.parameter && e.parameter.what === 'expense') {
+    try {
+      var exp = withLock_(function () {
+        var esh = expSheet_();
+        ensureExpHeaders_(esh);
+        ensureExpIds_(esh);
+        SpreadsheetApp.flush();
+        return esh.getDataRange().getDisplayValues();
+      });
+      return out_({ ok: true, rows: exp, fetchedAt: new Date().toISOString() }, cb);
+    } catch (err) {
+      return out_({ ok: false, error: String(err) }, cb);
+    }
+  }
+
   try {
     var values = withLock_(function () {
       var sh = sheet_();
@@ -300,6 +336,10 @@ function doPost(e) {
     if (action === 'remove') return removeItem_(body);
     if (action === 'status') return setStatus_(body);
     if (action === 'kind') return setKind_(body);
+    // 立替・精算（2枚目のシート）
+    if (action === 'exp_add') return addExpense_(body);
+    if (action === 'exp_update') return updateExpense_(body);
+    if (action === 'exp_remove') return removeExpense_(body);
     return out_({ ok: false, error: 'unknown action' });
 
   } catch (err) {
@@ -457,6 +497,210 @@ function removeItem_(body) {
     var row = rowOfId_(sh, id);
     if (row < 0) return out_({ ok: false, error: 'not found' });
     if (trim_(sh.getRange(row, COL_WHO).getValue(), 40) !== who) {
+      return out_({ ok: false, error: 'not yours' });
+    }
+    sh.deleteRow(row);
+    SpreadsheetApp.flush();
+    return out_({ ok: true, removed: 1 });
+  });
+}
+
+
+/* ══════════════════════════════════════════════════════════════════
+   ここから下は seisan.html（立替・精算）用。2枚目のシートだけを扱う。
+   ここの関数は sheet_() を呼ばないので、スポット希望リストには触れない。
+   ══════════════════════════════════════════════════════════════════ */
+
+/** 立替シートを返す。無ければ末尾に足して見出しを書く（1枚目は動かさない） */
+function expSheet_() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(EXPENSE_SHEET);
+  if (!sh) {
+    sh = ss.insertSheet(EXPENSE_SHEET, ss.getNumSheets());
+    sh.getRange(1, 1, 1, EXP_HEADERS.length).setValues([EXP_HEADERS]);
+  }
+  return sh;
+}
+
+/** 見出しが欠けていたら埋める。手で消されても次のアクセスで直る */
+function ensureExpHeaders_(sh) {
+  if (sh.getLastRow() < 1) {
+    sh.getRange(1, 1, 1, EXP_HEADERS.length).setValues([EXP_HEADERS]);
+    return;
+  }
+  var cur = sh.getRange(1, 1, 1, EXP_HEADERS.length).getValues()[0];
+  var changed = false;
+  for (var i = 0; i < EXP_HEADERS.length; i++) {
+    if (trim_(cur[i], 20) !== EXP_HEADERS[i]) { cur[i] = EXP_HEADERS[i]; changed = true; }
+  }
+  if (changed) sh.getRange(1, 1, 1, EXP_HEADERS.length).setValues([cur]);
+}
+
+/** IDの無い既存行を埋める。手で行を足されても持ち主判定が効くようにする */
+function ensureExpIds_(sh) {
+  var last = sh.getLastRow();
+  if (last < 2) return;
+  var ids = sh.getRange(2, EXP_ID, last - 1, 1).getValues();
+  var changed = false;
+  for (var i = 0; i < ids.length; i++) {
+    if (!trim_(ids[i][0], 40)) { ids[i][0] = newId_(); changed = true; }
+  }
+  if (changed) sh.getRange(2, EXP_ID, ids.length, 1).setValues(ids);
+}
+
+function expRowOfId_(sh, id) {
+  var last = sh.getLastRow();
+  if (last < 2) return -1;
+  var ids = sh.getRange(2, EXP_ID, last - 1, 1).getValues();
+  for (var i = 0; i < ids.length; i++) {
+    if (trim_(ids[i][0], 40) === id) return i + 2;
+  }
+  return -1;
+}
+
+/**
+ * 金額を整数（円）にする。全角数字・カンマ・「円」「¥」は落とす。
+ * 数字として読めなければ null。小数は受け付けない（円未満は扱わない）。
+ */
+function normAmount_(v) {
+  if (v == null) return null;
+  var s = String(v).replace(/[０-９]/g, function (c) {
+    return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+  }).replace(/[,\s￥¥円]/g, '');
+  if (!/^-?\d+$/.test(s)) return null;
+  var n = parseInt(s, 10);
+  return isNaN(n) ? null : n;
+}
+
+/** 対象メンバーを MEMBERS の並び順に正規化する。配列でもカンマ区切りでも受ける */
+function normTargets_(v) {
+  var list = [];
+  if (v instanceof Array) list = v;
+  else if (typeof v === 'string') list = v.split(',');
+  var picked = {};
+  for (var i = 0; i < list.length; i++) picked[trim_(list[i], 40)] = true;
+  var out = [];
+  for (var m = 0; m < MEMBERS.length; m++) if (picked[MEMBERS[m]]) out.push(MEMBERS[m]);
+  return out;
+}
+
+/** 個別内訳を {名前: 金額} にする。オブジェクトでも "Otsu:100,Sugi:200" でも受ける */
+function parseCustom_(v) {
+  var out = {};
+  if (!v) return out;
+  if (typeof v === 'string') {
+    var parts = v.split(',');
+    for (var i = 0; i < parts.length; i++) {
+      var kv = parts[i].split(':');
+      if (kv.length === 2) out[trim_(kv[0], 40)] = normAmount_(kv[1]);
+    }
+    return out;
+  }
+  for (var k in v) if (Object.prototype.hasOwnProperty.call(v, k)) out[trim_(k, 40)] = normAmount_(v[k]);
+  return out;
+}
+
+/**
+ * 受け取った内容を検査して、シートに書ける形に整える。
+ * 弾いたときは { err: 理由 } を返す。
+ * 個別入力のときは、内訳の合計が金額と一致することをここでも確かめる
+ * （ページ側でも見ているが、直接叩かれても壊れないようにするため）。
+ */
+function expFields_(body) {
+  var title = trim_(body.title, 60);
+  var amount = normAmount_(body.amount);
+  var payer = trim_(body.payer, 40);
+  var poster = trim_(body.who, 40);
+  var mode = trim_(body.mode, 10);
+  if (mode === 'equal') mode = '均等';
+  if (mode === 'custom') mode = '個別';
+  var targets = normTargets_(body.targets);
+  var custom = parseCustom_(body.custom);
+
+  if (!title) return { err: 'title' };
+  if (amount == null || amount < 1 || amount > MAX_AMOUNT) return { err: 'amount' };
+  if (MEMBERS.indexOf(payer) < 0) return { err: 'payer' };
+  if (MEMBERS.indexOf(poster) < 0) return { err: 'who' };
+  if (EXP_MODES.indexOf(mode) < 0) return { err: 'mode' };
+  if (!targets.length) return { err: 'targets' };
+
+  var customStr = '';
+  if (mode === '個別') {
+    var sum = 0, parts = [];
+    for (var i = 0; i < targets.length; i++) {
+      var a = custom[targets[i]];
+      if (a == null || a < 0) return { err: 'custom' };
+      sum += a;
+      parts.push(targets[i] + ':' + a);
+    }
+    if (sum !== amount) return { err: 'custom sum' };
+    customStr = parts.join(',');
+  }
+
+  return {
+    title: title, amount: amount, payer: payer, mode: mode,
+    targets: targets.join(','), custom: customStr, poster: poster
+  };
+}
+
+function nowStamp_() {
+  return Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd HH:mm');
+}
+
+
+function addExpense_(body) {
+  var f = expFields_(body);
+  if (f.err) return out_({ ok: false, error: f.err });
+
+  var id = newId_();
+  var row = [f.title, f.amount, f.payer, f.mode, f.targets, f.custom, f.poster, id, nowStamp_()];
+
+  return withLock_(function () {
+    var sh = expSheet_();
+    ensureExpHeaders_(sh);
+    ensureExpIds_(sh);
+    sh.getRange(sh.getLastRow() + 1, 1, 1, EXP_HEADERS.length).setValues([row]);
+    SpreadsheetApp.flush();
+    return out_({ ok: true, added: 1, id: id });
+  });
+}
+
+
+/** 自分が投稿した行だけ、内容をまるごと差し替える。IDと登録日時は残す */
+function updateExpense_(body) {
+  var id = trim_(body.id, 40);
+  if (!id) return out_({ ok: false, error: 'invalid' });
+  var f = expFields_(body);
+  if (f.err) return out_({ ok: false, error: f.err });
+
+  return withLock_(function () {
+    var sh = expSheet_();
+    ensureExpHeaders_(sh);
+    ensureExpIds_(sh);
+    var row = expRowOfId_(sh, id);
+    if (row < 0) return out_({ ok: false, error: 'not found' });
+    if (trim_(sh.getRange(row, EXP_POSTER).getValue(), 40) !== f.poster) {
+      return out_({ ok: false, error: 'not yours' });
+    }
+    sh.getRange(row, 1, 1, EXP_CUSTOM).setValues([[f.title, f.amount, f.payer, f.mode, f.targets, f.custom]]);
+    SpreadsheetApp.flush();
+    return out_({ ok: true, updated: 1 });
+  });
+}
+
+
+function removeExpense_(body) {
+  var id = trim_(body.id, 40);
+  var who = trim_(body.who, 40);
+  if (!id || MEMBERS.indexOf(who) < 0) return out_({ ok: false, error: 'invalid' });
+
+  return withLock_(function () {
+    var sh = expSheet_();
+    ensureExpHeaders_(sh);
+    ensureExpIds_(sh);
+    var row = expRowOfId_(sh, id);
+    if (row < 0) return out_({ ok: false, error: 'not found' });
+    if (trim_(sh.getRange(row, EXP_POSTER).getValue(), 40) !== who) {
       return out_({ ok: false, error: 'not yours' });
     }
     sh.deleteRow(row);

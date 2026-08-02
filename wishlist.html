@@ -91,7 +91,8 @@
   .band .eyebrow{color:var(--band-muted)}
   .band h1{font-size:clamp(24px,5.4vw,36px);margin:9px 0 6px}
   .band .sub{color:var(--band-muted);font-size:13.5px;margin:0}
-  .band .back{display:inline-block;margin-top:18px;color:var(--band-muted);
+  .band .navs{margin-top:18px;display:flex;gap:18px;flex-wrap:wrap}
+  .band .back{display:inline-block;color:var(--band-muted);
     font-size:12.5px;text-decoration:none;border-bottom:1px solid rgba(169,194,228,.45)}
 
   section.block{margin-bottom:46px}
@@ -252,7 +253,10 @@
     <p class="eyebrow">Wishlist Dashboard</p>
     <h1>行きたいスポット 集計</h1>
     <p class="sub">このページから行きたい場所を提出できます。集まった候補はエリア・優先度・提出者ごとに集計されます</p>
-    <a class="back" href="./">← 旅程表に戻る</a>
+    <nav class="navs">
+      <a class="back" href="./">← 旅程表に戻る</a>
+      <a class="back" href="seisan.html">立替・精算 →</a>
+    </nav>
   </div>
 </header>
 
