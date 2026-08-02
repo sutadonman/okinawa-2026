@@ -4,5 +4,6 @@
   "https://maps.app.goo.gl/NJLye6XT43SpissE8": { "name": "中村家住宅", "muni": "北中城村", "lat": 26.2898777, "lng": 127.8006433 },
   "https://maps.app.goo.gl/8KueGnpuEtxCcQRt9": { "name": "琉球村", "muni": "恩納村", "lat": 26.4294690, "lng": 127.7752590 },
   "https://maps.app.goo.gl/euWLJmvuZoHUFGMEA": { "name": "古宇利島", "muni": "今帰仁村", "lat": 26.7072982, "lng": 128.0181686 },
-  "https://maps.app.goo.gl/P5xa4YAvrqViskSL8": { "name": "東村ふれあいヒルギ公園", "muni": "東村", "lat": 26.6039851, "lng": 128.1448382 }
+  "https://maps.app.goo.gl/P5xa4YAvrqViskSL8": { "name": "東村ふれあいヒルギ公園", "muni": "東村", "lat": 26.6039851, "lng": 128.1448382 },
+  "https://maps.app.goo.gl/sAxbrnDr1BeWsoy87": { "name": "沖縄県平和祈念資料館", "muni": "糸満市", "lat": 26.0965744, "lng": 127.7254417 }
 }
