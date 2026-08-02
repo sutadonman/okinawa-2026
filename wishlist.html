@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<title>行きたいスポット ダッシュボード｜沖縄 2026.10</title>
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --ai:#1B3A5C; --ai-soft:#E7EEF4;
+    --umi:#0E8F8A; --umi-soft:#E0F1F0;
+    --bin:#C7431B; --bin-soft:#FBE9E2;
+    --ground:#F4F7F8; --surface:#FFFFFF;
+    --line:#D6E0E6; --line-soft:#E8EEF2;
+    --text:#152029; --muted:#5D6F7B;
+    --band:#173650; --band-text:#EEF4F8; --band-muted:#9DBBD2;
+    --grid:#E1E0D9; --axis:#C3C2B7;
+    /* categorical: dataviz reference slots 1-3 (all-pairs validated) */
+    --m1:#2a78d6; --m2:#eb6834; --m3:#1baf7a;
+    /* ordinal: priority high > middle > low */
+    --p-high:#104281; --p-mid:#2a78d6; --p-low:#86b6ef;
+    --shadow:0 1px 2px rgba(21,32,41,.05), 0 10px 28px -20px rgba(21,32,41,.5);
+    --font-display:"Hiragino Mincho ProN","Yu Mincho","YuMincho","Noto Serif JP",serif;
+    --font-body:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","YuGothic","Meiryo",system-ui,sans-serif;
+    --font-mono:ui-monospace,"SFMono-Regular","Consolas","Courier New",monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      --ai:#8FBEE4; --ai-soft:#1B2E3C; --umi:#3BC8BF; --umi-soft:#12312F;
+      --bin:#FF8155; --bin-soft:#36211A; --ground:#0C1620; --surface:#152430;
+      --line:#273B49; --line-soft:#1D2E3A; --text:#E3ECF2; --muted:#93A7B4;
+      --band:#0A141C; --band-text:#E9F1F6; --band-muted:#7E9CB2;
+      --grid:#2c2c2a; --axis:#383835;
+      --m1:#3987e5; --m2:#d95926; --m3:#199e70;
+      --p-high:#cde2fb; --p-mid:#5598e7; --p-low:#1c5cab;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ai:#8FBEE4; --ai-soft:#1B2E3C; --umi:#3BC8BF; --umi-soft:#12312F;
+    --bin:#FF8155; --bin-soft:#36211A; --ground:#0C1620; --surface:#152430;
+    --line:#273B49; --line-soft:#1D2E3A; --text:#E3ECF2; --muted:#93A7B4;
+    --band:#0A141C; --band-text:#E9F1F6; --band-muted:#7E9CB2;
+    --grid:#2c2c2a; --axis:#383835;
+    --m1:#3987e5; --m2:#d95926; --m3:#199e70;
+    --p-high:#cde2fb; --p-mid:#5598e7; --p-low:#1c5cab;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -20px rgba(0,0,0,.9);
+  }
+
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--text);
+    font-family:var(--font-body);font-size:15px;line-height:1.7}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px 80px}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;text-wrap:balance}
+  a{color:var(--umi)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--umi);outline-offset:3px}
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    font-family:var(--font-mono);color:var(--muted);margin:0}
+
+  .band{background:var(--band);color:var(--band-text);padding:38px 0 32px;margin-bottom:30px}
+  .band .wrap{padding-bottom:0}
+  .band .eyebrow{color:var(--band-muted)}
+  .band h1{font-size:clamp(24px,5.4vw,36px);margin:9px 0 6px}
+  .band .sub{color:var(--band-muted);font-size:13.5px;margin:0}
+  .band .back{display:inline-block;margin-top:18px;color:var(--band-muted);
+    font-size:12.5px;text-decoration:none;border-bottom:1px solid rgba(157,187,210,.4)}
+
+  section.block{margin-bottom:46px}
+  section.block > h2{font-size:21px;margin:4px 0 4px}
+  section.block > .lede{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+
+  /* ---- setup / status panel ---- */
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+    padding:20px;box-shadow:var(--shadow)}
+  .panel.warn{border-left:3px solid var(--bin)}
+  .panel h3{font-size:16px;margin-bottom:8px}
+  .panel p{margin:0 0 10px;font-size:13.5px;color:var(--muted)}
+  .panel ol{margin:0;padding-left:1.3em;font-size:13.5px}
+  .panel ol li{margin-bottom:6px}
+  code{font-family:var(--font-mono);font-size:12px;background:var(--ai-soft);
+    padding:1px 5px;border-radius:2px}
+  textarea{width:100%;min-height:130px;font-family:var(--font-mono);font-size:12px;
+    border:1px solid var(--line);border-radius:3px;padding:10px;background:var(--ground);
+    color:var(--text);resize:vertical}
+  button{font-family:var(--font-body);font-size:13.5px;font-weight:600;cursor:pointer;
+    background:var(--umi);color:#fff;border:none;padding:9px 18px;border-radius:2px;
+    margin-top:10px}
+  button.ghost{background:transparent;color:var(--umi);border:1px solid var(--umi)}
+
+  /* ---- stat tiles ---- */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+  .tile{background:var(--surface);padding:15px 17px}
+  .tile dt{font-size:11px;letter-spacing:.1em;color:var(--muted);
+    font-family:var(--font-mono);margin:0 0 3px}
+  .tile dd{margin:0;font-size:26px;font-weight:600;line-height:1.2;
+    font-family:var(--font-body)}
+  .tile dd small{font-size:12px;font-weight:400;color:var(--muted);margin-left:5px}
+
+  /* ---- map ---- */
+  .mapcard{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+    padding:16px;box-shadow:var(--shadow)}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  #map{max-width:430px;margin:0 auto}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:14px;
+    padding-top:13px;border-top:1px solid var(--line-soft)}
+  .legend span{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted)}
+  .legend i{width:11px;height:11px;border-radius:50%;flex:none;display:inline-block}
+  .smalls{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:16px}
+  .small h3{font-size:14px;margin-bottom:2px;display:flex;align-items:center;gap:7px}
+  .small h3 i{width:10px;height:10px;border-radius:50%;flex:none}
+  .small p{margin:0 0 8px;font-size:11.5px;color:var(--muted);font-family:var(--font-mono)}
+  .areaband{font-family:var(--font-mono);font-size:10px;fill:var(--muted);letter-spacing:.1em}
+  .munilabel{font-size:9.5px;fill:var(--muted);font-family:var(--font-body)}
+
+  /* ---- table ---- */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+  thead th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;color:var(--muted);
+    font-weight:400;background:var(--ai-soft);border-bottom:1px solid var(--line);
+    position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:none}
+  td.name{font-weight:600}
+  td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .chip{display:inline-block;font-size:10.5px;padding:2px 7px;border-radius:2px;
+    background:var(--ai-soft);color:var(--ai);white-space:nowrap}
+  .chip.inplan{background:var(--umi-soft);color:var(--umi);font-weight:600}
+  .pri{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-family:var(--font-mono)}
+  .pri i{width:9px;height:9px;border-radius:2px;flex:none}
+  .empty{color:var(--muted);font-size:11px}
+
+  .note{font-size:12px;color:var(--muted);margin-top:10px}
+  footer{border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12px}
+  .hide{display:none !important}
+
+  @media (max-width:560px){
+    .tile dd{font-size:22px}
+    .smalls{grid-template-columns:1fr 1fr;gap:10px}
+  }
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="wrap">
+    <p class="eyebrow">Wishlist Dashboard</p>
+    <h1>行きたいスポット 集計</h1>
+    <p class="sub">各自がスプレッドシートに提出した候補を、エリア・優先度・提出者ごとに集計します</p>
+    <a class="back" href="./">← 旅程表に戻る</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div id="status"></div>
+
+  <div id="content" class="hide">
+
+    <section class="block">
+      <p class="eyebrow">Summary</p>
+      <h2>いま出ている数</h2>
+      <p class="lede" id="updated"></p>
+      <dl class="tiles" id="tiles"></dl>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow">Where</p>
+      <h2>どのエリアに集まっているか</h2>
+      <p class="lede">丸の大きさが提出数です。市町村の位置に置いた模式図で、海岸線は描いていません。丸のない小さな点は、まだ誰も候補を出していない市町村。名前は複数出ているところだけ表示しています（丸に触れると名前と件数が出ます。全件は下の表にあります）。</p>
+      <div class="mapcard">
+        <svg id="map" viewBox="0 0 420 560" role="img" aria-label="市町村ごとの提出数を示した模式地図"></svg>
+        <div class="legend" id="maplegend"></div>
+      </div>
+
+      <div class="smalls" id="smalls"></div>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow">Consensus</p>
+      <h2>スポット別の一覧</h2>
+      <p class="lede">スコアは high=3 / middle=2 / low=1 の合計です。全員が出しているスポットほど上に来ます。</p>
+      <div class="tablewrap">
+        <table id="spots">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="note" id="tablenote"></p>
+    </section>
+
+    <section class="block">
+      <p class="eyebrow">By member</p>
+      <h2>提出者ごとの内訳</h2>
+      <div class="tablewrap">
+        <table id="bymember">
+          <thead></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>数値は提出シートをそのまま集計したものです。エリア（北部・中部・南部・離島）は市町村名から自動判定しています。地図上の位置は市町村のおおよその中心で、正確な境界や海岸線ではありません。</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ── 設定：スプレッドシートを「ウェブに公開（CSV）」したURLをここに入れる ──
+  var SHEET_CSV_URL = "";
+
+  // 市町村のおおよその中心座標（模式図用）
+  var MUNI = {
+    "国頭村":[26.758,128.178,"北部"], "大宜味村":[26.687,128.118,"北部"],
+    "東村":[26.606,128.120,"北部"],   "今帰仁村":[26.670,127.970,"北部"],
+    "本部町":[26.660,127.880,"北部"], "名護市":[26.592,127.977,"北部"],
+    "恩納村":[26.500,127.850,"北部"], "宜野座村":[26.483,127.980,"北部"],
+    "金武町":[26.455,127.925,"北部"], "伊江村":[26.716,127.790,"北部"],
+    "うるま市":[26.379,127.857,"中部"], "沖縄市":[26.334,127.805,"中部"],
+    "読谷村":[26.396,127.743,"中部"],   "嘉手納町":[26.362,127.755,"中部"],
+    "北谷町":[26.320,127.764,"中部"],   "北中城村":[26.302,127.793,"中部"],
+    "中城村":[26.276,127.786,"中部"],   "宜野湾市":[26.281,127.778,"中部"],
+    "浦添市":[26.246,127.721,"中部"],   "西原町":[26.227,127.758,"中部"],
+    "那覇市":[26.212,127.681,"南部"],   "豊見城市":[26.177,127.669,"南部"],
+    "糸満市":[26.124,127.666,"南部"],   "南城市":[26.143,127.766,"南部"],
+    "与那原町":[26.198,127.753,"南部"], "南風原町":[26.193,127.728,"南部"],
+    "八重瀬町":[26.133,127.722,"南部"]
+  };
+  var ALIAS = {"那覇":"那覇市","名護":"名護市","うるま":"うるま市","沖縄":"沖縄市",
+    "浦添":"浦添市","宜野湾":"宜野湾市","糸満":"糸満市","豊見城":"豊見城市",
+    "南城":"南城市","恩納":"恩納村","読谷":"読谷村","北谷":"北谷町","本部":"本部町",
+    "今帰仁":"今帰仁村","国頭":"国頭村","大宜味":"大宜味村","東":"東村","金武":"金武町",
+    "宜野座":"宜野座村","嘉手納":"嘉手納町","北中城":"北中城村","中城":"中城村",
+    "西原":"西原町","与那原":"与那原町","南風原":"南風原町","八重瀬":"八重瀬町","伊江":"伊江村"};
+
+  // 短縮URL（maps.app.goo.gl）は座標を持たないため、解決済みの対応表を別途読む
+  var RESOLVED = {};
+  function coordsFromUrl(u){
+    if(!u) return null;
+    var m = u.match(/[?&]query=(-?\d+\.\d+)[,%2C]+\s*(-?\d+\.\d+)/i) ||
+            u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) ||
+            u.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) ||
+            u.match(/[?&]q=(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+    return m ? [parseFloat(m[1]), parseFloat(m[2])] : null;
+  }
+  // 市町村の中心点だけだと中南部の密集地帯で取り違えるため、
+  // 主要地点を補助アンカーとして足して最近傍の精度を上げる
+  var ANCHORS = [];
+  (function(){
+    for(var n in MUNI) ANCHORS.push([MUNI[n][0], MUNI[n][1], n]);
+    [[26.2176,127.7190,"那覇市"],[26.2148,127.6893,"那覇市"],[26.2129,127.6918,"那覇市"],
+     [26.3309,127.8810,"うるま市"],[26.3608,127.9922,"うるま市"],[26.3359,127.9398,"うるま市"],
+     [26.3450,127.9650,"うるま市"],
+     [26.5398,127.9359,"名護市"],[26.5521,127.9699,"名護市"],
+     [26.8714,128.2656,"国頭村"],[26.8614,128.2512,"国頭村"],
+     [26.7073,128.0182,"今帰仁村"],[26.7157,128.0223,"今帰仁村"],[26.6922,127.9279,"今帰仁村"],
+     [26.7007,127.8773,"本部町"],[26.6944,127.8779,"本部町"],
+     [26.6040,128.1448,"東村"],
+     [26.1710,127.8260,"南城市"],[26.1450,127.7660,"南城市"],
+     [26.3157,127.7563,"北谷町"],
+     [26.5048,127.8497,"恩納村"],[26.4295,127.7753,"恩納村"],
+     [26.1780,127.6444,"豊見城市"],
+     [26.4405,127.7119,"読谷村"],[26.4066,127.7421,"読谷村"],[26.4054,127.7550,"読谷村"],
+     [26.2839,127.8012,"北中城村"],[26.2899,127.8006,"北中城村"]
+    ].forEach(function(a){ ANCHORS.push(a); });
+  })();
+  function nearestMuni(lat,lng){
+    var best=null, bd=Infinity, k=Math.cos(26.4*Math.PI/180);
+    for(var i=0;i<ANCHORS.length;i++){
+      var dx=(ANCHORS[i][1]-lng)*k, dy=ANCHORS[i][0]-lat, d=dx*dx+dy*dy;
+      if(d<bd){ bd=d; best=ANCHORS[i][2]; }
+    }
+    return best;
+  }
+
+  // 現行の旅程に入っているスポット（重複を知らせるため）
+  var IN_PLAN = ["玉陵","中村家住宅","中城城跡","美浜アメリカンビレッジ","琉球村","万座毛",
+    "ブセナ海中公園","道の駅許田","古宇利大橋","古宇利島","ティーヌ浜","東村ふれあいヒルギ公園",
+    "アスムイハイクス","大石林山","辺戸岬","勝連城跡","果報バンタ","海中道路","国際通り",
+    "第一牧志公設市場","壺屋やちむん通り"];
+
+  var PRI = {high:{w:3,label:"high",v:"--p-high"}, middle:{w:2,label:"middle",v:"--p-mid"},
+             low:{w:1,label:"low",v:"--p-low"}};
+  var MEMBER_VARS = ["--m1","--m2","--m3"];
+
+  var $ = function(id){ return document.getElementById(id); };
+  var esc = function(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); };
+
+  // ── CSV パース ──
+  function parseCSV(text){
+    var rows=[], row=[], cur="", q=false, i=0;
+    text = text.replace(/^﻿/,"").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+    for(; i<text.length; i++){
+      var ch=text[i];
+      if(q){
+        if(ch==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; }
+        else cur+=ch;
+      } else {
+        if(ch==='"') q=true;
+        else if(ch===","){ row.push(cur); cur=""; }
+        else if(ch==="\n"){ row.push(cur); rows.push(row); row=[]; cur=""; }
+        else cur+=ch;
+      }
+    }
+    if(cur!=="" || row.length){ row.push(cur); rows.push(row); }
+    return rows.filter(function(r){ return r.some(function(c){ return c.trim()!==""; }); });
+  }
+
+  function normPri(s){
+    s = String(s||"").trim().toLowerCase();
+    if(s.indexOf("high")===0 || s==="高" || s==="h") return "high";
+    if(s.indexOf("mid")===0 || s==="中" || s==="m") return "middle";
+    if(s.indexOf("low")===0 || s==="低" || s==="l") return "low";
+    return null;
+  }
+  function normMuni(s){
+    s = String(s||"").trim().replace(/\s/g,"").replace(/^沖縄県/,"");
+    if(MUNI[s]) return s;
+    if(ALIAS[s]) return ALIAS[s];
+    for(var k in MUNI){ if(s.indexOf(k)===0) return k; }
+    return null;
+  }
+
+  function toRecords(rows){
+    if(!rows.length) return [];
+    var head = rows[0].map(function(h){ return h.trim(); });
+    var idx = function(names){
+      for(var n=0;n<names.length;n++){ var i=head.indexOf(names[n]); if(i>=0) return i; }
+      return -1;
+    };
+    var c = {
+      who: idx(["提出者","名前","メンバー"]),
+      spot: idx(["スポット名","スポット","場所"]),
+      muni: idx(["市町村","市区町村"]),
+      pri: idx(["優先度","priority"]),
+      url: idx(["GoogleマップURL","Googleマップリンク","マップリンク","URL","リンク"]),
+      memo: idx(["ひとこと","メモ","コメント"]),
+      status: idx(["採否","ステータス"])
+    };
+    var out=[];
+    for(var r=1;r<rows.length;r++){
+      var row = rows[r];
+      var who = (c.who>=0?row[c.who]:"" ).trim();
+      var url = (c.url>=0?row[c.url]:"").trim();
+      var spot= (c.spot>=0?row[c.spot]:"").trim();
+      if(!who || (!url && !spot)) continue;
+      if(who.indexOf("（例）")===0 || who.indexOf("(例)")===0) continue;
+
+      // URLからテキストが混ざっていても拾えるようにする
+      var um = url.match(/https?:\/\/\S+/);
+      if(um){
+        if(!spot){ spot = url.replace(um[0],"").replace(/[\s\n]+/g," ").trim(); }
+        url = um[0];
+      }
+
+      var res = RESOLVED[url] || RESOLVED[url.replace(/\?.*$/,"")] || null;
+      var ll = coordsFromUrl(url);
+      if(!ll && res && res.lat != null) ll = [res.lat, res.lng];
+
+      var muni = normMuni(c.muni>=0?row[c.muni]:"") || (res && res.muni ? normMuni(res.muni) : null);
+      var estimated = false;
+      if(!muni && ll){ muni = nearestMuni(ll[0], ll[1]); estimated = true; }
+
+      if(!spot && res && res.name) spot = res.name;
+      if(!spot) spot = "（名称未設定）";
+
+      out.push({
+        who: who, spot: spot, url: url,
+        muni: muni, muniEstimated: estimated,
+        lat: ll ? ll[0] : null, lng: ll ? ll[1] : null,
+        resolved: !!ll,
+        pri: normPri(c.pri>=0?row[c.pri]:"") || "middle",
+        memo:(c.memo>=0?row[c.memo]:"").trim(),
+        status:(c.status>=0?row[c.status]:"").trim() || "未定"
+      });
+    }
+    return out;
+  }
+
+  // ── 描画 ──
+  function areaOf(m){ return m && MUNI[m] ? MUNI[m][2] : "不明"; }
+
+  function project(){
+    var lats=[], lngs=[];
+    for(var k in MUNI){ lats.push(MUNI[k][0]); lngs.push(MUNI[k][1]); }
+    var minLat=Math.min.apply(null,lats), maxLat=Math.max.apply(null,lats);
+    var minLng=Math.min.apply(null,lngs), maxLng=Math.max.apply(null,lngs);
+    var k = Math.cos(26.4*Math.PI/180);
+    var pad=54, W=420, H=560;
+    var w=(maxLng-minLng)*k, h=(maxLat-minLat);
+    var sx=(W-pad*2)/w, sy=(H-pad*2)/h, s=Math.min(sx,sy);
+    return function(lat,lng){
+      return [ pad + (lng-minLng)*k*s + ((W-pad*2)-w*s)/2,
+               H - pad - (lat-minLat)*s - ((H-pad*2)-h*s)/2 ];
+    };
+  }
+
+  function drawMap(svg, counts, opt){
+    opt = opt || {};
+    var P = project();
+    var maxC = 1;
+    for(var k in counts){ if(counts[k]>maxC) maxC=counts[k]; }
+    var parts = [];
+
+    // エリア帯のラベル
+    var bands = [["北部",26.62],["中部",26.31],["南部",26.16]];
+    bands.forEach(function(b){
+      var p = P(b[1], 127.60);
+      parts.push('<text class="areaband" x="6" y="'+(p[1]+3).toFixed(1)+'">'+b[0]+'</text>');
+    });
+
+    for(var name in MUNI){
+      var m = MUNI[name], p = P(m[0], m[1]);
+      var n = counts[name] || 0;
+      if(n === 0){
+        parts.push('<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.5" fill="var(--axis)"><title>'+esc(name)+'（提出なし）</title></circle>');
+      } else {
+        var r = 6 + 16 * Math.sqrt(n/maxC);
+        var fill = opt.color || "var(--m1)";
+        parts.push('<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="'+r.toFixed(1)+
+          '" fill="'+fill+'" fill-opacity="0.75" stroke="var(--surface)" stroke-width="2">'+
+          '<title>'+esc(name)+'：'+n+'件</title></circle>');
+        // 直接ラベルは選択的に。密集する中部・南部でラベルが重なるため、
+        // 2件以上のところだけ名前を出し、残りは表とホバーで補う
+        if(opt.labels && n >= opt.labelMin){
+          parts.push('<text class="munilabel" x="'+(p[0]+r+4).toFixed(1)+'" y="'+(p[1]+3.5).toFixed(1)+
+            '">'+esc(name)+' '+n+'</text>');
+        }
+      }
+    }
+    svg.innerHTML = parts.join("");
+  }
+
+  function render(recs){
+    $("content").classList.remove("hide");
+
+    var members = [];
+    recs.forEach(function(r){ if(members.indexOf(r.who)<0) members.push(r.who); });
+    members.sort();
+
+    // ---- tiles ----
+    var spotSet = {}; recs.forEach(function(r){ spotSet[r.spot]=1; });
+    var unresolved = recs.filter(function(r){ return !r.resolved; });
+    var tiles = [
+      ["提出", recs.length, "件"],
+      ["提出者", members.length, "人"],
+      ["スポット", Object.keys(spotSet).length, "か所"],
+      ["場所が未解決", unresolved.length, "件"]
+    ];
+    if(unresolved.length){
+      var names = {};
+      unresolved.forEach(function(r){ names[r.who+"："+r.spot]=1; });
+      $("status").innerHTML = '<div class="panel warn" style="margin-bottom:30px">' +
+        '<h3>場所を特定できていない提出が ' + unresolved.length + ' 件あります</h3>' +
+        '<p style="margin:0">短縮URL（maps.app.goo.gl）はブラウザから転送先を辿れないため、地図と集計に反映されていません。' +
+        '「未解決分を解決して」と伝えてもらえれば、こちらで座標を調べて反映します。</p>' +
+        '<p style="margin:8px 0 0"><span class="empty">' + esc(Object.keys(names).join(" / ")) + '</span></p></div>';
+    }
+    $("tiles").innerHTML = tiles.map(function(t){
+      return '<div class="tile"><dt>'+esc(t[0])+'</dt><dd>'+t[1]+'<small>'+esc(t[2])+'</small></dd></div>';
+    }).join("");
+
+    // ---- main map ----
+    var counts = {};
+    recs.forEach(function(r){ if(r.muni) counts[r.muni]=(counts[r.muni]||0)+1; });
+    var mx = 1; for(var mk in counts){ if(counts[mk]>mx) mx=counts[mk]; }
+    drawMap($("map"), counts, {color:"var(--m1)", labels:true, labelMin: mx>=2 ? 2 : 1});
+    var areaTotals = {"北部":0,"中部":0,"南部":0};
+    recs.forEach(function(r){ var a=areaOf(r.muni); if(areaTotals[a]!=null) areaTotals[a]++; });
+    $("maplegend").innerHTML =
+      '<span><i style="background:var(--m1)"></i>提出あり（丸の大きさ＝件数）</span>' +
+      '<span><i style="background:var(--axis)"></i>提出なし</span>' +
+      Object.keys(areaTotals).map(function(a){
+        return '<span>'+esc(a)+' '+areaTotals[a]+'件</span>'; }).join("");
+
+    // ---- small multiples ----
+    $("smalls").innerHTML = members.map(function(m,i){
+      return '<div class="small"><h3><i style="background:var('+MEMBER_VARS[i%3]+')"></i>'+esc(m)+'</h3>'+
+        '<p id="smallcap'+i+'"></p><svg id="small'+i+'" viewBox="0 0 420 560" role="img" aria-label="'+
+        esc(m)+'さんの提出分布"></svg></div>';
+    }).join("");
+    members.forEach(function(m,i){
+      var c = {};
+      recs.forEach(function(r){ if(r.who===m && r.muni) c[r.muni]=(c[r.muni]||0)+1; });
+      drawMap($("small"+i), c, {color:"var("+MEMBER_VARS[i%3]+")"});
+      var n = recs.filter(function(r){ return r.who===m; }).length;
+      var as = {}; recs.forEach(function(r){ if(r.who===m){ var a=areaOf(r.muni); as[a]=(as[a]||0)+1; } });
+      $("smallcap"+i).textContent = n+"件 / "+Object.keys(as).map(function(a){return a+" "+as[a];}).join("・");
+    });
+
+    // ---- spots table ----
+    var bySpot = {};
+    recs.forEach(function(r){
+      if(!bySpot[r.spot]) bySpot[r.spot] = {spot:r.spot, muni:r.muni, muniEstimated:r.muniEstimated,
+        url:r.url, status:r.status, by:{}, score:0, memos:[]};
+      var s = bySpot[r.spot];
+      s.by[r.who] = r.pri;
+      s.score += PRI[r.pri].w;
+      if(r.url && !s.url) s.url = r.url;
+      if(r.memo) s.memos.push(r.who+"："+r.memo);
+      if(!s.muni && r.muni){ s.muni=r.muni; s.muniEstimated=r.muniEstimated; }
+    });
+    var list = Object.keys(bySpot).map(function(k){ return bySpot[k]; });
+    list.sort(function(a,b){ return b.score-a.score || a.spot.localeCompare(b.spot,"ja"); });
+
+    var head = '<tr><th>スポット</th><th>エリア</th><th>市町村</th>' +
+      members.map(function(m){ return '<th>'+esc(m)+'</th>'; }).join("") +
+      '<th>スコア</th><th>状態</th><th>地図</th></tr>';
+    $("spots").tHead.innerHTML = head;
+
+    var priCell = function(p){
+      if(!p) return '<span class="empty">—</span>';
+      return '<span class="pri"><i style="background:var('+PRI[p].v+')"></i>'+PRI[p].label+'</span>';
+    };
+    $("spots").tBodies[0].innerHTML = list.map(function(s){
+      var inPlan = IN_PLAN.some(function(n){ return s.spot.indexOf(n)>=0 || n.indexOf(s.spot)>=0; });
+      var mapUrl = s.url || (s.muni ? "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(s.spot+" "+s.muni) : "");
+      return '<tr>' +
+        '<td class="name">'+esc(s.spot) +
+          (inPlan ? ' <span class="chip inplan">旅程入り済み</span>' : '') +
+          (s.memos.length ? '<br><span class="empty">'+esc(s.memos.join(" / "))+'</span>' : '') + '</td>' +
+        '<td>'+esc(areaOf(s.muni))+'</td>' +
+        '<td>'+esc(s.muni || "—")+(s.muni && s.muniEstimated ? ' <span class="empty">推定</span>' : '')+'</td>' +
+        members.map(function(m){ return '<td>'+priCell(s.by[m])+'</td>'; }).join("") +
+        '<td class="num">'+s.score+'</td>' +
+        '<td><span class="chip">'+esc(s.status)+'</span></td>' +
+        '<td>'+(mapUrl ? '<a href="'+esc(mapUrl)+'" target="_blank" rel="noopener">開く ↗</a>' : '<span class="empty">—</span>')+'</td>' +
+      '</tr>';
+    }).join("");
+
+    var all = list.filter(function(s){ return Object.keys(s.by).length === members.length; });
+    $("tablenote").textContent = members.length > 1
+      ? "全員が挙げているスポット：" + (all.length ? all.map(function(s){return s.spot;}).join("、") : "まだありません")
+      : "";
+
+    // ---- by member ----
+    $("bymember").tHead.innerHTML = '<tr><th>提出者</th><th>high</th><th>middle</th><th>low</th><th>合計</th><th>北部</th><th>中部</th><th>南部</th></tr>';
+    $("bymember").tBodies[0].innerHTML = members.map(function(m){
+      var mine = recs.filter(function(r){ return r.who===m; });
+      var cnt = function(f){ return mine.filter(f).length; };
+      return '<tr><td class="name">'+esc(m)+'</td>' +
+        '<td class="num">'+cnt(function(r){return r.pri==="high";})+'</td>' +
+        '<td class="num">'+cnt(function(r){return r.pri==="middle";})+'</td>' +
+        '<td class="num">'+cnt(function(r){return r.pri==="low";})+'</td>' +
+        '<td class="num">'+mine.length+'</td>' +
+        '<td class="num">'+cnt(function(r){return areaOf(r.muni)==="北部";})+'</td>' +
+        '<td class="num">'+cnt(function(r){return areaOf(r.muni)==="中部";})+'</td>' +
+        '<td class="num">'+cnt(function(r){return areaOf(r.muni)==="南部";})+'</td>' +
+      '</tr>';
+    }).join("");
+
+    $("updated").textContent = "読み込み時刻：" + new Date().toLocaleString("ja-JP");
+  }
+
+  function setupPanel(msg){
+    $("status").innerHTML =
+      '<div class="panel warn"><h3>まだ提出シートにつながっていません</h3>' +
+      (msg ? '<p>'+esc(msg)+'</p>' : '') +
+      '<ol>' +
+      '<li><a href="wishlist-template.csv" download>wishlist-template.csv</a> をダウンロードし、Google スプレッドシートに読み込む（ファイル → インポート）。現行の旅程は Otsu の提出分として入っています</li>' +
+      '<li>メンバー3人に「編集者」権限で共有する。各自は行を足して、<code>提出者</code>・<code>GoogleマップURL</code>・<code>優先度</code>（high / middle / low）を埋めるだけ</li>' +
+      '<li>ファイル → 共有 → <code>ウェブに公開</code> → 形式を <code>カンマ区切り形式(.csv)</code> にして公開</li>' +
+      '<li>表示されたURLを伝えてもらえれば、このページに組み込みます</li>' +
+      '</ol>' +
+      '<p style="margin-top:14px">先に中身を見たい場合は、シートの内容をコピーしてここに貼り付けてください。この端末だけで集計します（どこにも送信しません）。</p>' +
+      '<textarea id="paste" placeholder="提出者,GoogleマップURL,優先度,スポット名,... を貼り付け"></textarea>' +
+      '<button id="pastego">貼り付けた内容で集計する</button></div>';
+    $("pastego").addEventListener("click", function(){
+      var t = $("paste").value.trim();
+      if(!t){ return; }
+      var recs = toRecords(parseCSV(t));
+      if(!recs.length){ alert("データを読み取れませんでした。1行目に見出し（提出者・スポット名・市町村・優先度）があるか確認してください。"); return; }
+      var keep = $("status").innerHTML;
+      render(recs);
+      if($("status").innerHTML === keep){
+        $("status").innerHTML = '<div class="panel" style="margin-bottom:30px"><p style="margin:0">貼り付けた内容で集計しています（'+recs.length+'件）。シートを公開して連携すれば、以降は自動で最新になります。</p></div>';
+      }
+    });
+  }
+
+  // 短縮URLの対応表を先に読む（無くても動く）
+  fetch("resolved.json", {cache:"no-store"})
+    .then(function(r){ return r.ok ? r.json() : {}; })
+    .catch(function(){ return {}; })
+    .then(function(map){
+      Object.keys(map||{}).forEach(function(k){ if(k.charAt(0)!=="_") RESOLVED[k]=map[k]; });
+      start();
+    });
+
+  function start(){
+    if(!SHEET_CSV_URL){ setupPanel(""); return; }
+    $("status").innerHTML = '<div class="panel"><p style="margin:0">提出シートを読み込んでいます…</p></div>';
+    fetch(SHEET_CSV_URL, {cache:"no-store"})
+      .then(function(res){ if(!res.ok) throw new Error("HTTP "+res.status); return res.text(); })
+      .then(function(text){
+        var recs = toRecords(parseCSV(text));
+        $("status").innerHTML = "";
+        if(!recs.length){
+          $("status").innerHTML = '<div class="panel warn"><h3>まだ提出がありません</h3><p style="margin:0">シートには接続できています。誰かが1行入力すると、ここに集計が出ます。</p></div>';
+          return;
+        }
+        render(recs);
+      })
+      .catch(function(e){ setupPanel("シートの読み込みに失敗しました（"+e.message+"）。公開設定を確認するか、下の貼り付けで暫定的に集計できます。"); });
+  }
+})();
+</script>
+</body>
+</html>

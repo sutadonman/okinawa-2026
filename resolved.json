@@ -1,0 +1,8 @@
+{
+  "_readme": "GoogleマップURL → 実際の場所。短縮URLはブラウザから解決できないため、Claudeが転送先を辿って追記します。手で編集しても構いません。",
+  "https://maps.app.goo.gl/LZoR8wkevmVwonEn8": { "name": "玉陵", "muni": "那覇市", "lat": 26.2183169, "lng": 127.7147476 },
+  "https://maps.app.goo.gl/NJLye6XT43SpissE8": { "name": "中村家住宅", "muni": "北中城村", "lat": 26.2898777, "lng": 127.8006433 },
+  "https://maps.app.goo.gl/8KueGnpuEtxCcQRt9": { "name": "琉球村", "muni": "恩納村", "lat": 26.4294690, "lng": 127.7752590 },
+  "https://maps.app.goo.gl/euWLJmvuZoHUFGMEA": { "name": "古宇利島", "muni": "今帰仁村", "lat": 26.7072982, "lng": 128.0181686 },
+  "https://maps.app.goo.gl/P5xa4YAvrqViskSL8": { "name": "東村ふれあいヒルギ公園", "muni": "東村", "lat": 26.6039851, "lng": 128.1448382 }
+}
