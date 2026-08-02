@@ -120,8 +120,16 @@
   .msg.ng{color:var(--bin)}
   .mine{margin:16px 0 0;padding-top:13px;border-top:1px solid var(--line-soft);
     font-size:12.5px;color:var(--muted)}
-  .mine ol{margin:6px 0 0;padding-left:1.3em}
-  .mine li{margin-bottom:3px}
+  .mine ul{list-style:none;margin:9px 0 0;padding:0}
+  .mine li{display:flex;align-items:center;gap:9px;padding:7px 0;
+    border-bottom:1px solid var(--line-soft)}
+  .mine li:last-child{border-bottom:none}
+  .mine .mname{flex:1 1 auto;min-width:0;color:var(--text);font-weight:600;font-size:13px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mine select{flex:none;font-family:var(--font-mono);font-size:12px;padding:5px 6px;
+    border:1px solid var(--line);border-radius:3px;background:var(--ground);color:var(--text)}
+  .mine button{flex:none;margin-top:0;padding:5px 10px;font-size:12px}
+  .mine .msg{margin-top:10px}
 
   /* ---- stat tiles ---- */
   .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
@@ -173,6 +181,8 @@
   @media (max-width:560px){
     .tile dd{font-size:22px}
     .smalls{grid-template-columns:1fr 1fr;gap:10px}
+    /* 取り下げは誤タップが痛いので、指で押せる高さを確保する */
+    .mine button,.mine select{padding:9px 11px;min-height:42px}
   }
   @media (prefers-reduced-motion: reduce){*{transition:none !important}}
 </style>
@@ -243,7 +253,8 @@
 
       <div class="mine hide" id="mine">
         <span id="minehead"></span>
-        <ol id="minelist"></ol>
+        <ul id="minelist"></ul>
+        <p class="msg" id="m-msg"></p>
       </div>
     </div>
   </section>
@@ -445,7 +456,8 @@
       pri: idx(["優先度","priority"]),
       url: idx(["GoogleマップURL","Googleマップリンク","マップリンク","URL","リンク"]),
       memo: idx(["ひとこと","メモ","コメント"]),
-      status: idx(["採否","ステータス"])
+      status: idx(["採否","ステータス"]),
+      id: idx(["ID"])
     };
     var out=[];
     for(var r=1;r<rows.length;r++){
@@ -475,6 +487,7 @@
       if(!spot) spot = "（名称未設定）";
 
       out.push({
+        id: (c.id>=0 ? row[c.id] : "").trim(),
         who: who, spot: spot, url: url,
         muni: muni, muniEstimated: estimated,
         lat: ll ? ll[0] : null, lng: ll ? ll[1] : null,
@@ -543,6 +556,8 @@
 
   function render(recs){
     $("content").classList.remove("hide");
+    RECS = recs;
+    showMine();
 
     var members = [];
     recs.forEach(function(r){ if(members.indexOf(r.who)<0) members.push(r.who); });
@@ -709,8 +724,9 @@
     });
   }
 
-  function post(items){
-    var payload = JSON.stringify({token:TOKEN, items:items});
+  function send(obj){
+    obj.token = TOKEN;
+    var payload = JSON.stringify(obj);
     // text/plain にすると preflight が飛ばないぶん通りやすい
     var opts = {method:"POST", body:payload,
                 headers:{"Content-Type":"text/plain;charset=utf-8"}};
@@ -730,23 +746,77 @@
       });
   }
 
-  var MINE_KEY = "okinawa2026.mine", WHO_KEY = "okinawa2026.who";
+  var WHO_KEY = "okinawa2026.who";
   function store(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
   function load(k){ try{ return localStorage.getItem(k)||""; }catch(e){ return ""; } }
 
+  // 最後に読み込んだ提出一覧。修正・取り下げのリストはここから作る
+  var RECS = [];
+
+  function currentWho(){
+    var el = document.querySelector('input[name="who"]:checked');
+    return el ? el.value : "";
+  }
+
+  function mineMsg(text, bad){
+    var el = $("m-msg");
+    el.className = "msg" + (bad ? " ng" : text ? " ok" : "");
+    el.textContent = text || "";
+  }
+
+  // 自分の提出だけを、優先度の変更と取り下げができる形で並べる。
+  // localStorage ではなくシートを正とするので、別の端末から直しても揃う
   function showMine(){
-    var raw = load(MINE_KEY), list;
-    try{ list = JSON.parse(raw||"[]"); }catch(e){ list = []; }
-    if(!list.length){ $("mine").classList.add("hide"); return; }
-    $("mine").classList.remove("hide");
-    $("minehead").textContent = "この端末から提出した " + list.length + "件";
-    $("minelist").innerHTML = list.map(function(x){
-      return "<li>" + esc(x.spot || x.url) + "（" + esc(x.pri) + "）</li>";
+    var who = currentWho(), box = $("mine");
+    var mine = who ? RECS.filter(function(r){ return r.who===who && r.id; }) : [];
+    if(!mine.length){ box.classList.add("hide"); return; }
+    box.classList.remove("hide");
+    $("minehead").textContent = who + " の提出 " + mine.length + "件 — 優先度の変更と取り下げができます";
+    $("minelist").innerHTML = mine.map(function(r){
+      return '<li data-id="'+esc(r.id)+'">' +
+        '<span class="mname">'+esc(r.spot)+'</span>' +
+        '<select class="mpri" aria-label="'+esc(r.spot)+' の優先度">' +
+          ["high","middle","low"].map(function(p){
+            return '<option value="'+p+'"'+(r.pri===p?' selected':'')+'>'+p+'</option>';
+          }).join("") +
+        '</select>' +
+        '<button type="button" class="ghost mdel">取り下げ</button>' +
+      '</li>';
     }).join("");
   }
 
+  function bindMine(){
+    $("minelist").addEventListener("change", function(ev){
+      var sel = ev.target.closest ? ev.target.closest(".mpri") : null;
+      if(!sel) return;
+      var li = sel.closest("li"), id = li.getAttribute("data-id");
+      sel.disabled = true;
+      mineMsg("変更しています…");
+      send({action:"update", id:id, who:currentWho(), pri:sel.value})
+        .then(function(){ mineMsg("優先度を変更しました。"); reload(); })
+        .catch(function(e){ mineMsg("変更できませんでした（"+e.message+"）。", true); })
+        .then(function(){ sel.disabled = false; });
+    });
+
+    $("minelist").addEventListener("click", function(ev){
+      var btn = ev.target.closest ? ev.target.closest(".mdel") : null;
+      if(!btn) return;
+      var li = btn.closest("li"), id = li.getAttribute("data-id");
+      var name = li.querySelector(".mname").textContent;
+      if(!window.confirm("「"+name+"」を取り下げます。よろしいですか？")) return;
+      btn.disabled = true;
+      mineMsg("取り下げています…");
+      send({action:"remove", id:id, who:currentWho()})
+        .then(function(){ mineMsg("取り下げました。"); reload(); })
+        .catch(function(e){
+          mineMsg("取り下げできませんでした（"+e.message+"）。", true);
+          btn.disabled = false;
+        });
+    });
+  }
+
   function setupForm(){
-    var form = $("wform"), msg = $("f-msg"), send = $("f-send");
+    var form = $("wform"), msg = $("f-msg"), sendBtn = $("f-send");
 
     if(!API_URL){
       $("formpanel").innerHTML =
@@ -763,7 +833,16 @@
       var pre = form.querySelector('input[name="who"][value="'+saved.replace(/"/g,"")+'"]');
       if(pre) pre.checked = true;
     }
+    bindMine();
     showMine();
+
+    // 提出者を切り替えたら、自分の提出一覧もその人のものに差し替える
+    form.addEventListener("change", function(ev){
+      if(ev.target.name !== "who") return;
+      store(WHO_KEY, ev.target.value);
+      mineMsg("");
+      showMine();
+    });
 
     form.addEventListener("submit", function(ev){
       ev.preventDefault();
@@ -783,30 +862,25 @@
       if(!url && !spot){ msg.className="msg ng"; msg.textContent="リンクかスポット名のどちらかは必要です。"; $("f-url").focus(); return; }
       if(url && !/^https?:\/\//i.test(url)){ msg.className="msg ng"; msg.textContent="リンクは http から始まる形で貼ってください。"; $("f-url").focus(); return; }
 
-      send.disabled = true;
+      sendBtn.disabled = true;
       msg.textContent = "送信しています…";
 
-      post([{who:who, url:url, spot:spot, pri:pri, memo:memo}])
+      send({action:"add", items:[{who:who, url:url, spot:spot, pri:pri, memo:memo}]})
         .then(function(res){
           store(WHO_KEY, who);
-          var list; try{ list = JSON.parse(load(MINE_KEY)||"[]"); }catch(e){ list=[]; }
-          list.push({spot:spot, url:url, pri:pri});
-          store(MINE_KEY, JSON.stringify(list));
-
           $("f-url").value=""; $("f-spot").value=""; $("f-memo").value="";
           form.querySelector('input[name="pri"][value="middle"]').checked = true;
           msg.className = "msg ok";
           msg.textContent = res.unverified
             ? "送信しました（このブラウザでは結果を確認できないため、下の集計に出るか確かめてください）。"
             : "提出しました。続けて出せます。";
-          showMine();
-          setTimeout(reload, 1200);
+          reload();
         })
         .catch(function(err){
           msg.className = "msg ng";
           msg.textContent = "送信できませんでした（" + err.message + "）。もう一度試すか、内容を LINE で送ってください。";
         })
-        .then(function(){ send.disabled = false; });
+        .then(function(){ sendBtn.disabled = false; });
     });
   }
 
@@ -823,6 +897,8 @@
     $("status").innerHTML = '<div class="panel warn"><h3>まだ提出がありません</h3>' +
       '<p style="margin:0">シートには接続できています。上のフォームから1件出すと、ここに集計が出ます。</p></div>';
     $("content").classList.add("hide");
+    RECS = [];
+    showMine();
   }
 
   function start(){ setupForm(); loadData(false); }
