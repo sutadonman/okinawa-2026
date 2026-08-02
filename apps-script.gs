@@ -228,18 +228,54 @@ function parsePlace_(url) {
 }
 
 /**
- * 短縮URLを、座標つきの素直な形に置き換える。
+ * スマホアプリの共有リンクは、地点名の前に郵便番号と住所が付く。
+ *   「〒900-0036 沖縄県那覇市西１丁目７−３ ジャッキーステーキハウス」
+ * 住所らしいトークンを前から捨てて、店名だけ残す。
+ */
+function cleanPlaceName_(raw) {
+  var s = trim_(raw, 200).replace(/^〒\s*\d{3}[-−]?\d{4}\s*/, '');
+  var parts = s.split(/[\s　]+/);
+  var kept = [];
+  for (var i = 0; i < parts.length; i++) { if (parts[i]) kept.push(parts[i]); }
+  if (kept.length < 2) return s;
+
+  var lastAddr = -1;
+  for (var j = 0; j < kept.length; j++) {
+    if (/[都道府県]$/.test(kept[j]) || /[市区町村]/.test(kept[j]) ||
+        /丁目|番地/.test(kept[j]) || /[0-9０-９]+[−\-‐]/.test(kept[j])) {
+      lastAddr = j;
+    }
+  }
+  if (lastAddr >= 0 && lastAddr < kept.length - 1) return kept.slice(lastAddr + 1).join(' ');
+  return s;
+}
+
+/**
+ * 短縮URLを、地図が読める素直な形に置き換える。
  * 返り値は { url, spot }。解決できなければ null。
  */
 function resolveShort_(url, spot) {
   var expanded = expandUrl_(url);
   if (!expanded) return null;
   var p = parsePlace_(expanded);
-  if (p.lat == null) return null;
-  return {
-    url: 'https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng,
-    spot: spot || p.name
-  };
+  var name = spot || cleanPlaceName_(p.name);
+
+  if (p.lat != null) {
+    return {
+      url: 'https://www.google.com/maps/search/?api=1&query=' + p.lat + ',' + p.lng,
+      spot: name
+    };
+  }
+
+  // スマホアプリの共有リンクは座標を持たず、施設のIDしか入っていないことがある。
+  // 名前が取れていればそれで検索するURLに置き換え、座標はページ側が Places から引く
+  if (name) {
+    return {
+      url: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name),
+      spot: name
+    };
+  }
+  return null;
 }
 
 /**

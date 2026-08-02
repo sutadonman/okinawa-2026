@@ -614,14 +614,15 @@
   function photoStore(m){ try{ localStorage.setItem(PHOTO_KEY, JSON.stringify(m)); }catch(e){} }
 
   // 旧 PlacesService は2025年3月以降の新規プロジェクトでは使えないため、
-  // Places API (New) の Place.searchByText を使う
-  function findPhoto(r){
+  // Places API (New) の Place.searchByText を使う。
+  // 写真と座標を1回の検索でまとめて取り、結果は端末に貯める（課金が検索1回ぶんのため）
+  function lookupPlace(r){
     var cache = photoLoad(), hit = cache[r.spot];
-    if(hit && (Date.now()-hit.ts) < PHOTO_TTL) return Promise.resolve(hit.url||"");
+    if(hit && (Date.now()-hit.ts) < PHOTO_TTL) return Promise.resolve(hit);
 
     var req = {
       textQuery: r.spot + " 沖縄",
-      fields: ["displayName","photos"],
+      fields: ["displayName","photos","location"],
       maxResultCount: 1,
       language: "ja", region: "jp"
     };
@@ -629,20 +630,51 @@
 
     return google.maps.places.Place.searchByText(req)
       .then(function(res){
-        var places = (res && res.places) || [];
-        var url = "";
-        if(places[0] && places[0].photos && places[0].photos.length){
-          url = places[0].photos[0].getURI({maxWidth:460});
+        var p = ((res && res.places) || [])[0];
+        var rec = {url:"", lat:null, lng:null, ts:Date.now()};
+        if(p){
+          if(p.photos && p.photos.length) rec.url = p.photos[0].getURI({maxWidth:460});
+          if(p.location){
+            rec.lat = (typeof p.location.lat === "function") ? p.location.lat() : p.location.lat;
+            rec.lng = (typeof p.location.lng === "function") ? p.location.lng() : p.location.lng;
+          }
         }
         // 見つからなかった事実も憶えておく（毎回引き直すと課金が増えるため）
-        var c = photoLoad(); c[r.spot] = {url:url, ts:Date.now()}; photoStore(c);
-        return url;
+        var c = photoLoad(); c[r.spot] = rec; photoStore(c);
+        return rec;
       })
       .catch(function(err){
         // APIが未有効などの失敗はキャッシュしない。直したあと自然に復旧させる
         PHOTO_ERR = (err && err.message) ? err.message : "写真を取得できません";
-        return "";
+        return {url:"", lat:null, lng:null};
       });
+  }
+
+  function findPhoto(r){
+    return lookupPlace(r).then(function(x){ return x.url || ""; });
+  }
+
+  // スマホのGoogleマップアプリが出す共有リンクは、施設IDだけで座標を持たない。
+  // 名前は取れているので、Places で引いて座標を埋める（写真と同じ1回の検索で済む）
+  var COORDS_FILLED = false;
+  function fillMissingCoords(recs){
+    if(COORDS_FILLED) return Promise.resolve(false);
+    var need = recs.filter(function(r){
+      return (r.lat==null || r.lng==null) && r.spot && r.spot !== "（名称未設定）";
+    });
+    if(!need.length){ COORDS_FILLED = true; return Promise.resolve(false); }
+
+    return Promise.all(need.map(function(r){
+      return lookupPlace(r).then(function(x){
+        if(x.lat == null) return false;
+        r.lat = x.lat; r.lng = x.lng; r.resolved = true;
+        if(!r.muni){ r.muni = nearestMuni(x.lat, x.lng); r.muniEstimated = true; }
+        return true;
+      });
+    })).then(function(results){
+      COORDS_FILLED = true;
+      return results.some(function(ok){ return ok; });
+    });
   }
 
   function forgetPhoto(spot){
@@ -780,7 +812,13 @@
   function setupGoogleMap(recs, members){
     if(!MAPS_API_KEY) return;
     loadMaps()
-      .then(function(){ buildGoogleMap(recs, members); })
+      .then(function(){ return fillMissingCoords(recs); })
+      .then(function(filled){
+        // 座標を埋められたら、集計や一覧も埋めたあとの姿で出し直す。
+        // fillMissingCoords は一度きりなので、ここで再帰しても止まる
+        if(filled){ render(recs); return; }
+        buildGoogleMap(recs, members);
+      })
       .catch(function(e){
         $("gmapblock").classList.remove("hide");
         $("gmap").innerHTML = '<div class="gph" style="height:100%">' +
@@ -826,6 +864,9 @@
         'この分は変換に失敗しています。ページを開き直すと再試行します。' +
         'それでも残る場合は「未解決分を解決して」と伝えてください。</p>' +
         '<p style="margin:8px 0 0"><span class="empty">' + esc(Object.keys(names).join(" / ")) + '</span></p></div>';
+    } else {
+      // 座標を後から補えたときに、1回目の描画で出した警告が残らないようにする
+      $("status").innerHTML = "";
     }
     $("tiles").innerHTML = tiles.map(function(t){
       return '<div class="tile"><dt>'+esc(t[0])+'</dt><dd>'+t[1]+'<small>'+esc(t[2])+'</small></dd></div>';
