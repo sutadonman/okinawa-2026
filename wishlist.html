@@ -157,6 +157,23 @@
   .areaband{font-family:var(--font-mono);font-size:10px;fill:var(--muted);letter-spacing:.1em}
   .munilabel{font-size:9.5px;fill:var(--muted);font-family:var(--font-body)}
 
+  /* ---- google map ---- */
+  #gmap{width:100%;height:460px;border-radius:3px;background:var(--line-soft)}
+  @media (max-width:560px){ #gmap{height:380px} }
+  /* InfoWindow の中身。Google 側の白背景の上に載るので、色は固定値で指定する */
+  .gcard{width:230px;font-family:var(--font-body);color:#152029}
+  .gcard img{display:block;width:100%;height:130px;object-fit:cover;
+    border-radius:2px;background:#e8eef2}
+  .gcard .gph{display:flex;align-items:center;justify-content:center;
+    height:130px;border-radius:2px;background:#eef2f5;color:#5D6F7B;font-size:11.5px}
+  .gcard h4{margin:9px 0 3px;font-size:14px;font-family:var(--font-display);font-weight:600}
+  .gcard p{margin:0 0 4px;font-size:11.5px;color:#5D6F7B}
+  .gcard .gwho{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono)}
+  .gcard .gwho i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .gcard .gmemo{color:#152029;font-size:12px;margin-bottom:6px}
+  .gcard a{color:#0E8F8A;font-size:12px;font-weight:600;text-decoration:none}
+  .legend i.sz{border-radius:50%}
+
   /* ---- table ---- */
   .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
   table{border-collapse:collapse;width:100%;font-size:13px;min-width:640px}
@@ -270,6 +287,17 @@
       <dl class="tiles" id="tiles"></dl>
     </section>
 
+    <section class="block hide" id="gmapblock">
+      <p class="eyebrow">Map</p>
+      <h2>出ているスポットを地図で見る</h2>
+      <p class="lede">色が提出者、濃さと大きさが優先度です。ピンにマウスを合わせる（スマホはタップ）と、写真とひとことが出ます。カード内のリンクから Google マップを開けます。</p>
+      <div class="mapcard">
+        <div id="gmap"></div>
+        <div class="legend" id="glegend"></div>
+        <p class="note" id="gnote"></p>
+      </div>
+    </section>
+
     <section class="block">
       <p class="eyebrow">Where</p>
       <h2>どのエリアに集まっているか</h2>
@@ -324,6 +352,12 @@
 
   // apps-script.gs の TOKEN と同じ文字列。いたずら投稿を止めるだけの合言葉
   var TOKEN = "okinawa2026-3nin-2f9a41c7";
+
+  // Google Maps Platform のAPIキー。空にすると地図を出さず、下の模式図だけになる。
+  // 公開ページに載る前提の鍵なので、Cloud Console 側で必ず制限をかけておくこと
+  //   ・HTTPリファラー：https://sutadonman.github.io/*  と  http://localhost:8731/*
+  //   ・API：Maps JavaScript API / Places API / Places API (New) の3つのみ
+  var MAPS_API_KEY = "AIzaSyC_59OTAut7_92OfRQEbnpLKhvWJCI-pPY";
 
   // 旧方式（シートを「ウェブに公開」した CSV）。API_URL があればそちらが優先される
   var SHEET_CSV_URL = "";
@@ -500,6 +534,182 @@
     return out;
   }
 
+  // ── Google マップ ──
+  var GMAP=null, GINFO=null, GMARKERS=[], GOPEN=null, GLOADING=null;
+
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function loadMaps(){
+    if(GLOADING) return GLOADING;
+    if(!MAPS_API_KEY) return Promise.reject(new Error("APIキーが未設定です"));
+    GLOADING = new Promise(function(resolve, reject){
+      window.__gmapReady = function(){ resolve(); };
+      var s = document.createElement("script");
+      s.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(MAPS_API_KEY) +
+              "&libraries=places&language=ja&region=JP&loading=async&callback=__gmapReady";
+      s.async = true;
+      s.onerror = function(){ reject(new Error("読み込みに失敗しました")); };
+      document.head.appendChild(s);
+      // キーやリファラーが弾かれると callback が来ないまま黙るので、時間で打ち切る
+      setTimeout(function(){ reject(new Error("応答がありません")); }, 15000);
+    });
+    return GLOADING;
+  }
+
+  // 写真は Places の検索1回ぶんが課金対象なので、端末側に貯めて再取得を減らす
+  var PHOTO_KEY = "okinawa2026.photos", PHOTO_TTL = 7*24*3600*1000, PHOTO_ERR = "";
+  function photoLoad(){ try{ return JSON.parse(localStorage.getItem(PHOTO_KEY)||"{}"); }catch(e){ return {}; } }
+  function photoStore(m){ try{ localStorage.setItem(PHOTO_KEY, JSON.stringify(m)); }catch(e){} }
+
+  // 旧 PlacesService は2025年3月以降の新規プロジェクトでは使えないため、
+  // Places API (New) の Place.searchByText を使う
+  function findPhoto(r){
+    var cache = photoLoad(), hit = cache[r.spot];
+    if(hit && (Date.now()-hit.ts) < PHOTO_TTL) return Promise.resolve(hit.url||"");
+
+    var req = {
+      textQuery: r.spot + " 沖縄",
+      fields: ["displayName","photos"],
+      maxResultCount: 1,
+      language: "ja", region: "jp"
+    };
+    if(r.lat!=null) req.locationBias = {center:{lat:r.lat, lng:r.lng}, radius:3000};
+
+    return google.maps.places.Place.searchByText(req)
+      .then(function(res){
+        var places = (res && res.places) || [];
+        var url = "";
+        if(places[0] && places[0].photos && places[0].photos.length){
+          url = places[0].photos[0].getURI({maxWidth:460});
+        }
+        // 見つからなかった事実も憶えておく（毎回引き直すと課金が増えるため）
+        var c = photoLoad(); c[r.spot] = {url:url, ts:Date.now()}; photoStore(c);
+        return url;
+      })
+      .catch(function(err){
+        // APIが未有効などの失敗はキャッシュしない。直したあと自然に復旧させる
+        PHOTO_ERR = (err && err.message) ? err.message : "写真を取得できません";
+        return "";
+      });
+  }
+
+  function forgetPhoto(spot){
+    var c = photoLoad(); delete c[spot]; photoStore(c);
+  }
+
+  function cardHtml(r, color, photoUrl, state){
+    var maps = r.url || ("https://www.google.com/maps/search/?api=1&query=" +
+      encodeURIComponent(r.spot + " 沖縄"));
+    var top;
+    if(photoUrl){
+      top = '<img src="'+esc(photoUrl)+'" alt="'+esc(r.spot)+'" ' +
+            'onerror="window.__photoFailed &amp;&amp; window.__photoFailed(this)" ' +
+            'data-spot="'+esc(r.spot)+'">';
+    } else {
+      var why = state==="loading" ? "写真を探しています…" : (PHOTO_ERR ? "写真を取得できません" : "写真なし");
+      top = '<div class="gph">'+esc(why)+'</div>';
+    }
+    return '<div class="gcard">' + top +
+      '<div class="gbody">' +
+      '<h4>'+esc(r.spot)+'</h4>' +
+      '<p><span class="gwho"><i style="background:'+esc(color)+'"></i>'+esc(r.who)+'</span>' +
+      ' ・ '+esc(r.pri)+(r.status && r.status!=="未定" ? ' ・ '+esc(r.status) : '')+'</p>' +
+      (r.memo ? '<p class="gmemo">'+esc(r.memo)+'</p>' : '') +
+      '<a href="'+esc(maps)+'" target="_blank" rel="noopener">Google マップで開く ↗</a>' +
+      '</div></div>';
+  }
+
+  // 期限切れの写真URLを掴んだときは、キャッシュを捨てて次回引き直させる
+  window.__photoFailed = function(img){
+    forgetPhoto(img.getAttribute("data-spot"));
+    var box = img.parentNode;
+    if(box) img.outerHTML = '<div class="gph">写真なし</div>';
+  };
+
+  function openCard(mk, r, color){
+    GOPEN = mk;
+    GINFO.setContent(cardHtml(r, color, "", "loading"));
+    GINFO.open({anchor:mk, map:GMAP});
+    findPhoto(r).then(function(url){
+      if(GOPEN !== mk) return;   // 別のピンに移っていたら差し替えない
+      GINFO.setContent(cardHtml(r, color, url, "done"));
+    });
+  }
+
+  function buildGoogleMap(recs, members){
+    var pts = recs.filter(function(r){ return r.lat!=null && r.lng!=null; });
+    if(!pts.length) return;
+
+    $("gmapblock").classList.remove("hide");
+
+    if(!GMAP){
+      GMAP = new google.maps.Map($("gmap"), {
+        mapTypeControl:false, streetViewControl:false, gestureHandling:"greedy",
+        clickableIcons:false
+      });
+      GINFO = new google.maps.InfoWindow({maxWidth:250});
+      GINFO.addListener("closeclick", function(){ GOPEN = null; });
+    }
+
+    GMARKERS.forEach(function(m){ m.setMap(null); });
+    GMARKERS = [];
+    GOPEN = null;
+    GINFO.close();
+
+    var SIZE = {high:11, middle:8, low:6};
+    var OPACITY = {high:0.95, middle:0.7, low:0.45};
+    var bounds = new google.maps.LatLngBounds();
+
+    pts.forEach(function(r){
+      var mi = members.indexOf(r.who); if(mi < 0) mi = 0;
+      var color = cssVar(MEMBER_VARS[mi % 3]) || "#2a78d6";
+      var mk = new google.maps.Marker({
+        position:{lat:r.lat, lng:r.lng}, map:GMAP, title:r.spot,
+        // high を前面に出して、重なったときに埋もれないようにする
+        zIndex: r.pri==="high" ? 3 : r.pri==="middle" ? 2 : 1,
+        icon:{ path:google.maps.SymbolPath.CIRCLE, scale:SIZE[r.pri]||8,
+               fillColor:color, fillOpacity:OPACITY[r.pri]||0.7,
+               strokeColor:"#ffffff", strokeWeight:2 }
+      });
+      var open = function(){ openCard(mk, r, color); };
+      mk.addListener("mouseover", open);
+      mk.addListener("click", open);
+      GMARKERS.push(mk);
+      bounds.extend(mk.getPosition());
+    });
+
+    GMAP.fitBounds(bounds, 44);
+
+    $("glegend").innerHTML =
+      members.map(function(m,i){
+        return '<span><i style="background:'+esc(cssVar(MEMBER_VARS[i%3]))+'"></i>'+esc(m)+'</span>';
+      }).join("") +
+      ['high','middle','low'].map(function(p){
+        var d = SIZE[p];
+        return '<span><i class="sz" style="width:'+d+'px;height:'+d+'px;background:var(--muted);'+
+               'opacity:'+OPACITY[p]+'"></i>'+p+'</span>';
+      }).join("");
+
+    var noPos = recs.length - pts.length;
+    $("gnote").textContent = noPos
+      ? pts.length + "件を表示しています。座標が分からない " + noPos + "件は地図に出ていません。"
+      : pts.length + "件すべてを表示しています。";
+  }
+
+  function setupGoogleMap(recs, members){
+    if(!MAPS_API_KEY) return;
+    loadMaps()
+      .then(function(){ buildGoogleMap(recs, members); })
+      .catch(function(e){
+        $("gmapblock").classList.remove("hide");
+        $("gmap").innerHTML = '<div class="gph" style="height:100%">' +
+          '地図を表示できませんでした（' + esc(e.message) + '）</div>';
+        $("gnote").textContent = "APIキーの制限（リファラーと対象API）と、Cloud Console での有効化を確認してください。";
+      });
+  }
+
   // ── 描画 ──
   function areaOf(m){ return m && MUNI[m] ? MUNI[m][2] : "不明"; }
 
@@ -562,6 +772,8 @@
     var members = [];
     recs.forEach(function(r){ if(members.indexOf(r.who)<0) members.push(r.who); });
     members.sort();
+
+    setupGoogleMap(recs, members);
 
     // ---- tiles ----
     var spotSet = {}; recs.forEach(function(r){ spotSet[r.spot]=1; });
