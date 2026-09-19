@@ -1007,7 +1007,7 @@
     if(!quiet){
       $("status").innerHTML = '<div class="panel"><p style="margin:0">立替を読み込んでいます…</p></div>';
     }
-    return jsonp(API_URL + "?what=expense")
+    return jsonp(API_URL + "?what=expense", 30000)
       .then(function(j){
         if(!j || !j.ok) throw new Error(errText(j && j.error));
         var rows = j.rows || [];

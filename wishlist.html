@@ -958,6 +958,9 @@
     $("status").innerHTML =
       '<div class="panel warn"><h3>まだ提出シートにつながっていません</h3>' +
       (msg ? '<p>'+esc(msg)+'</p>' : '') +
+      (API_URL ? '<p class="note"><b>まず切り分け：</b><a href="'+esc(API_URL)+'" target="_blank" rel="noopener">いま設定されている /exec を直接開く ↗</a><br>' +
+        '・<code>{"ok":true, ...}</code> が表示される → スクリプト側は正常です。このページからの読み込みだけが止められています（広告ブロッカー等の拡張機能、あるいはネットワークが <code>script.googleusercontent.com</code> を遮断しているのが典型）。シークレットウィンドウで開くと切り分けられます。<br>' +
+        '・Googleのログイン画面や権限エラーが出る → デプロイのアクセス権が「全員」になっていません。</p>' : '') +
       '<ol>' +
       '<li>Google スプレッドシート「沖縄2026 スポット希望リスト」を開く（マイドライブの <code>/trip/202610沖縄/</code> 配下）</li>' +
       '<li>拡張機能 → Apps Script を開き、<code>apps-script.gs</code> の中身を貼り付ける</li>' +
@@ -1221,7 +1224,7 @@
       if(!quiet){
         $("status").innerHTML = '<div class="panel"><p style="margin:0">提出を読み込んでいます…</p></div>';
       }
-      jsonp(API_URL)
+      jsonp(API_URL, 30000)
         .then(function(j){
           if(!j || !j.ok) throw new Error(j && j.error ? j.error : "読み取れませんでした");
           var recs = toRecords(j.rows || []);
