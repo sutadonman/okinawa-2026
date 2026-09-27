@@ -149,6 +149,10 @@
   .chip.book{background:var(--bin-soft);color:var(--bin);font-weight:600}
   .chip.sea{background:var(--umi-soft);color:var(--umi)}
   .card p{margin:7px 0 0;font-size:13.5px;color:var(--muted);line-height:1.7}
+  /* 営業日・最終入場。行程が休館日に当たる事故を防ぐため、各カードに明記する */
+  .card p.hours{margin-top:9px;padding:6px 10px;border-left:3px solid var(--umi);
+    background:var(--umi-soft);color:var(--text);font-size:12.5px;border-radius:2px}
+  .card p.hours.warn{border-left-color:var(--bin);background:var(--bin-soft)}
   .card p strong{color:var(--text)}
   .card-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:11px}
   .pin{font-size:12.5px;text-decoration:none;color:var(--umi);font-weight:600;
@@ -293,15 +297,15 @@
     <div class="day-head">
       <span class="day-no">DAY 1</span>
       <span class="day-date">10/08 木</span>
-      <span class="day-theme">那覇の王陵 → 中部の古民家とグスク → 北谷で夕食</span>
-      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.2064,127.6467&amp;destination=26.280555,127.738276&amp;waypoints=26.218317,127.714748%7C26.289878,127.800643%7C26.283934,127.801160%7C26.3157,127.7563&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
+      <span class="day-theme">首里の石畳と王陵 → 中城城跡 → 宜野湾で早めに休む</span>
+      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.2064,127.6467&amp;destination=26.280555,127.738276&amp;waypoints=26.213889,127.717500%7C26.218317,127.714748%7C26.283934,127.801160&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
     </div>
 
     <div class="mapframe daymap">
       <iframe title="Day 1 のルート" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
         src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;saddr=26.2064,127.6467&amp;daddr=26.218317,127.714748+to:26.289878,127.800643+to:26.283934,127.801160+to:26.3157,127.7563+to:26.280555,127.738276"></iframe>
     </div>
-    <p class="mapcap">那覇空港 → 玉陵 → 中村家住宅 → 中城城跡 → 美浜アメリカンビレッジ → ラグナガーデンホテル（約41km）</p>
+    <p class="mapcap">那覇空港 → 金城町石畳道 → 玉陵 → 富久屋 → 中城城跡 → ラグナガーデンホテル（約40km）</p>
 
     <ol class="stops">
       <li class="stop">
@@ -331,67 +335,60 @@
       </li>
       <li class="leg"><span>車 25分 / 約8km（国道331号）</span></li>
       <li class="stop">
-        <div class="when"><span class="time">11:20</span><span class="dur">40分</span></div>
+        <div class="when"><span class="time">11:15</span><span class="dur">30分</span></div>
+        <div class="card">
+          <div class="card-head"><h3>金城町石畳道</h3><span class="chip">史跡</span></div>
+          <p>16世紀の琉球石灰岩の敷石が約240m残る坂道。首里城側から下って、大アカギのある拝所あたりで折り返すのが手頃です。下まで（金城橋）往復すると登り返しがきついので、昼食前は途中までが無難。常時通行可で料金もかかりません。</p>
+          <p class="hours"><strong>常時開放</strong>／急な坂道。雨天時は敷石が滑ります</p>
+          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.213889,127.717500" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.213889, 127.717500</span></div>
+          <details class="spotmap"><summary>地図を表示</summary>
+            <div class="mapframe"><iframe title="金城町石畳道の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.213889,127.717500"></iframe></div>
+          </details>
+        </div>
+      </li>
+      <li class="leg"><span>徒歩 10分（坂を登り返して首里城側へ）</span></li>
+      <li class="stop">
+        <div class="when"><span class="time">12:00</span><span class="dur">40分</span></div>
         <div class="card">
           <div class="card-head"><h3>玉陵（たまうどぅん）</h3><span class="chip">世界遺産</span><span class="chip">史跡</span></div>
           <p>琉球王国・第二尚氏の王陵。首里城をスキップしても、ここだけで琉球石造建築の迫力は十分伝わります。東室・中室・西室の並びと、資料館にある沖縄戦の被弾跡の解説が見どころ。専用駐車場は小さいので、首里杜館か周辺のコインパーキングが確実。</p>
+          <p class="hours"><strong>年中無休</strong>／9:00〜18:00（入場締切 17:30）</p>
           <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.218317,127.714748" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.218317, 127.714748</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="玉陵の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.218317,127.714748"></iframe></div>
           </details>
         </div>
       </li>
-      <li class="leg"><span>車 5分（首里エリア内）</span></li>
+      <li class="leg"><span>徒歩 10分 ／ 車 5分（首里エリア内）</span></li>
       <li class="stop">
-        <div class="when"><span class="time">12:10</span><span class="dur">60分</span></div>
+        <div class="when"><span class="time">12:50</span><span class="dur">60分</span></div>
         <div class="card">
-          <div class="card-head"><h3>昼食：首里の沖縄そば</h3><span class="chip">グルメ</span></div>
-          <p>初日の1杯は王道で。「首里そば」は昼過ぎに売り切れることがあるので、混んでいたら「しむじょう」など首里周辺の候補に切り替えを。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=%E9%A6%96%E9%87%8C+%E6%B2%96%E7%B8%84%E3%81%9D%E3%81%B0" target="_blank" rel="noopener">候補を地図で見る ↗</a></div>
+          <div class="card-head"><h3>昼食：富久屋（ふくや）</h3><span class="chip">グルメ</span></div>
+          <p>首里当蔵町の古民家食堂。沖縄そばのほか、じんわり甘いイナムドゥチが名物です。首里城の北側すぐで、玉陵からも歩ける距離。<strong>初日は木曜なので「首里そば」は定休日です</strong>（木・日休）。</p>
+          <p class="hours"><strong>火曜定休</strong>／11:30〜15:00（L.O. 14:30）・18:00〜22:00</p>
+          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=%E5%AF%8C%E4%B9%85%E5%B1%8B+%E9%A6%96%E9%87%8C%E5%BD%93%E8%94%B5%E7%94%BA" target="_blank" rel="noopener">Google マップ ↗</a></div>
         </div>
       </li>
-      <li class="leg"><span>車 35分 / 約15km（那覇IC〜北中城IC・沖縄自動車道）</span></li>
+      <li class="leg"><span>車 30分 / 約15km（那覇IC〜北中城IC・沖縄自動車道）</span></li>
       <li class="stop">
-        <div class="when"><span class="time">13:40</span><span class="dur">40分</span></div>
-        <div class="card">
-          <div class="card-head"><h3>中村家住宅</h3><span class="chip">重要文化財</span></div>
-          <p>18世紀中頃の豪農屋敷がほぼ完全な形で残る国指定重要文化財。赤瓦・ヒンプン・高倉・石垣がひと通り揃っていて、沖縄の伝統住居を理解するならここが一番早い。縁側でさんぴん茶が飲めます。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.289878,127.800643" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.289878, 127.800643</span></div>
-          <details class="spotmap"><summary>地図を表示</summary>
-            <div class="mapframe"><iframe title="中村家住宅の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.289878,127.800643"></iframe></div>
-          </details>
-        </div>
-      </li>
-      <li class="leg"><span>車 5分 / 約1.5km（すぐ隣）</span></li>
-      <li class="stop">
-        <div class="when"><span class="time">14:30</span><span class="dur">60分</span></div>
+        <div class="when"><span class="time">14:20</span><span class="dur">70分</span></div>
         <div class="card">
           <div class="card-head"><h3>中城城跡</h3><span class="chip">世界遺産</span><span class="chip sea">絶景</span></div>
-          <p>中村家住宅の目の前。護佐丸が築いた城壁が良好に残り、六つの郭から東シナ海と太平洋の両方が見渡せます。首里城の代わりの「グスク枠」として相性がいい。入口までカートで送ってくれます。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.283934,127.801160" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.283934, 127.801160</span></div>
+          <p>護佐丸が築いた城壁が良好に残り、六つの郭から東シナ海と太平洋の両方が見渡せます。首里城の代わりの「グスク枠」として相性がいい。入口までカートで送ってくれます。すぐ隣の中村家住宅は木曜休館のため、Day4に回しました。</p>
+          <p class="hours"><strong>年中無休</strong>／10月は 8:30〜17:00（5〜9月のみ18:00まで）</p>
+            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.283934,127.801160" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.283934, 127.801160</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="中城城跡の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.283934,127.801160"></iframe></div>
           </details>
         </div>
       </li>
-      <li class="leg"><span>車 30分 / 約13km（国道58号）</span></li>
+      <li class="leg"><span>車 35分 / 約17km（北中城IC〜西原IC・沖縄自動車道）</span></li>
       <li class="stop">
-        <div class="when"><span class="time">16:00</span><span class="dur">2.5時間</span></div>
-        <div class="card">
-          <div class="card-head"><h3>美浜アメリカンビレッジ（北谷）</h3><span class="chip sea">サンセット</span><span class="chip">グルメ</span></div>
-          <p>サンセットビーチで日没（10月中旬は18:20頃）を見てから夕食。ステーキ、タコス、クラフトビールとハズレが少なく、3人旅の初日の夜に向いています。駐車場は無料。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.3157,127.7563" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.3157, 127.7563</span></div>
-          <details class="spotmap"><summary>地図を表示</summary>
-            <div class="mapframe"><iframe title="美浜アメリカンビレッジの地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.3157,127.7563"></iframe></div>
-          </details>
-        </div>
-      </li>
-      <li class="leg"><span>車 15分 / 約6km（国道58号を南下）</span></li>
-      <li class="stop">
-        <div class="when"><span class="time">18:45</span><span class="dur">泊</span></div>
+        <div class="when"><span class="time">16:05</span><span class="dur">泊</span></div>
         <div class="card">
           <div class="card-head"><h3>ラグナガーデンホテル（宜野湾）</h3><span class="chip">予約済</span><span class="chip">朝食付</span></div>
-          <p><strong>10,200円／名・朝食付き、予約済み。</strong>宜野湾コンベンションエリアの海沿いで、北谷からは国道58号を<strong>南に15分</strong>。初日の夜の移動が短く済みます。そのかわり<strong>翌朝の琉球村までは車30分</strong>あるので、Day 2 は8:20発です。</p>
+          <p><strong>10,200円／名・朝食付き、予約済み。</strong>宜野湾コンベンションエリアの海沿い。初日は飛行機と運転で疲れているので、<strong>早めに入って休みます</strong>。<strong>翌朝の琉球村までは車30分</strong>あるので、Day 2 は8:20発です。</p>
+          <p><strong>夕方以降、気が向いたら美浜アメリカンビレッジ（北谷）へ。</strong>ホテルから国道58号を<strong>北へ車15分</strong>、駐車場は無料です。サンセットビーチの日没は10月中旬で18:20頃。ステーキ・タコス・クラフトビールとハズレが少ないので、夕食だけ食べに出るのもあり。行かない日は館内で済ませられます。<a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.3157,127.7563" target="_blank" rel="noopener">アメビレを地図で見る ↗</a></p>
           <div class="card-foot"><a class="pin" href="https://www.laguna-garden.jp/" target="_blank" rel="noopener">公式サイト ↗</a><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.280555,127.738276" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.280555, 127.738276</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="ラグナガーデンホテルの地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.280555,127.738276"></iframe></div>
@@ -442,7 +439,8 @@
         <div class="card">
           <div class="card-head"><h3>琉球村</h3><span class="chip">体験・文化</span></div>
           <p>古民家を移築したテーマパーク。10:00前後の「道ジュネー」（エイサー・獅子舞のパレード）が名物なので、その回に合わせると満足度が上がります。三線や藍染の体験は当日受付枠あり。開園9:00。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.429469,127.775259" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.429469, 127.775259</span></div>
+          <p class="hours"><strong>年中無休</strong>／10月は 8:30〜17:30（最終入園 17:00）。道ジュネーは毎日開催（開催時刻は要確認）</p>
+            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.429469,127.775259" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.429469, 127.775259</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="琉球村の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.429469,127.775259"></iframe></div>
           </details>
@@ -454,7 +452,8 @@
         <div class="card">
           <div class="card-head"><h3>万座毛</h3><span class="chip sea">絶景</span></div>
           <p>象の鼻の形をした琉球石灰岩の断崖。遊歩道は一周15分ほど。現在は「万座毛周辺活性化施設」経由の有料入場＋駐車場料金。写真は西側の展望デッキから。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.5048,127.8497" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.5048, 127.8497</span></div>
+          <p class="hours"><strong>年中無休</strong>／3〜10月は 8:00〜20:00</p>
+            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.5048,127.8497" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.5048, 127.8497</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="万座毛の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.5048,127.8497"></iframe></div>
           </details>
@@ -466,7 +465,8 @@
         <div class="card">
           <div class="card-head"><h3>ブセナ海中公園</h3><span class="chip sea">クルージング</span></div>
           <p>部瀬名岬の先端。<strong>グラス底ボート</strong>は所要約20分で、サンゴと熱帯魚を船底のガラス越しに見下ろすクルーズ。濡れないし泳がなくていいので、3人の体力配分にも優しい。<strong>海中展望塔</strong>は沖縄本島で唯一、螺旋階段で水深5mまで降りて丸窓から魚を眺める施設で、こちらとセット券にするのが定番です。両方回って60〜70分。天候・波が高い日はボートが欠航することがあります。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.539819,127.935858" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.539819, 127.935858</span></div>
+          <p class="hours"><strong>年中無休</strong>（年末年始・お盆・GWを除く）／海中展望塔は4〜10月 9:00〜18:00</p>
+            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.539819,127.935858" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.539819, 127.935858</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="ブセナ海中公園の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.539819,127.935858"></iframe></div>
           </details>
@@ -579,7 +579,8 @@
         <div class="card">
           <div class="card-head"><h3>備瀬のフクギ並木</h3><span class="chip">集落・並木</span></div>
           <p>エメラルドビーチの<strong>すぐ隣</strong>。防風林として植えられたフクギが約2万本、碁盤の目の集落を緑のトンネルで覆っています。砂道を歩くと日差しがほぼ遮られて涼しい。水牛車もありますが、3人なら歩きで十分回れます。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.7007,127.8773" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.7007, 127.8773</span></div>
+          <p class="hours"><strong>常時開放</strong>／集落内なので早朝・夜間は静かに</p>
+            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.7007,127.8773" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.7007, 127.8773</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="備瀬のフクギ並木の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.7007,127.8773"></iframe></div>
           </details>
@@ -592,7 +593,8 @@
           <div class="card-head"><h3>宮里そば（名護・昼食）</h3><span class="chip">グルメ</span></div>
           <p>Runto の希望枠。名護市宮里の沖縄そば店。<strong>日曜定休</strong>なので、この旅程で行けるのは 10/09 か 10/10 だけです。</p>
           <p><strong>あえて11:50着にしてあります。</strong>開店10:00の1時間50分後で、売り切れ次第終了の店に対してここが一番安全な時刻だからです。3連休初日の土曜なので行列は覚悟してください——集合まで<strong>1時間のバッファ</strong>があるので、並んでもカヤックには響きません。営業時間は情報が割れている（16:30まで／17:00まで／売り切れまで）ので、こだわるなら電話で確認を（0980-54-1444）。</p>
-          <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.593978,127.970714" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.593978, 127.970714</span></div>
+          <p class="hours warn"><strong>定休日の情報が錯綜しています（日曜休／水曜休／不定休）。出発前に要確認 0980-54-1444</strong></p>
+            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.593978,127.970714" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.593978, 127.970714</span></div>
           <details class="spotmap"><summary>地図を表示</summary>
             <div class="mapframe"><iframe title="宮里そばの地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.593978,127.970714"></iframe></div>
           </details>
@@ -632,43 +634,31 @@
     <div class="day-head">
       <span class="day-no">DAY 4</span>
       <span class="day-date">10/11 日</span>
-      <span class="day-theme">ジェフで朝食 → 勝連城跡 → 海中道路 → おきみゅー → 19:00発</span>
-      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.420203,127.819982&amp;destination=26.2064,127.6467&amp;waypoints=26.320260,127.827465%7C26.330879,127.881008%7C26.360843,127.992234%7C26.335858,127.939774%7C26.227314,127.693849%7C26.2148,127.6893&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
+      <span class="day-theme">勝連城跡 → 海中道路 → 中村家住宅 → おきみゅー → 19:00発</span>
+      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.420203,127.819982&amp;destination=26.2064,127.6467&amp;waypoints=26.330879,127.881008%7C26.360843,127.992234%7C26.335858,127.939774%7C26.289878,127.800643%7C26.227314,127.693849%7C26.2148,127.6893&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
     </div>
 
     <div class="mapframe daymap">
       <iframe title="Day 4 のルート" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
         src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;saddr=26.420203,127.819982&amp;daddr=26.320260,127.827465+to:26.330879,127.881008+to:26.360843,127.992234+to:26.335858,127.939774+to:26.227314,127.693849+to:26.2148,127.6893+to:26.2064,127.6467"></iframe>
     </div>
-    <p class="mapcap">ココガーデン → ジェフ泡瀬 → 勝連城跡 → 果報バンタ → 海中道路 → おきみゅー → 国際通り → 那覇空港（約90km）</p>
+    <p class="mapcap">ココガーデン → 勝連城跡 → 果報バンタ → 海中道路 → 中村家住宅 → おきみゅー → 国際通り → 那覇空港（約95km）</p>
 
       <ol class="stops">
         <li class="stop">
-          <div class="when"><span class="time">08:00</span><span class="dur">出発</span></div>
+          <div class="when"><span class="time">08:30</span><span class="dur">出発</span></div>
           <div class="card">
             <div class="card-head"><h3>ココガーデンをチェックアウト</h3><span class="chip">移動</span></div>
-            <p>19:00発、レンタカーの返却期限は17:30。空港着17:45が死守ラインなので、返却は17:15着を目標にして15分の余裕を持たせます。<strong>ジェフに寄るぶん、出発は8:00</strong>（寄らない場合は8:50発で勝連城跡9:15に間に合います）。</p>
+            <p>19:00発、レンタカーの返却期限は17:30。空港着17:45が死守ラインなので、返却は17:15着を目標にして15分の余裕を持たせます。<strong>ココガーデンは朝食付き</strong>なので、朝食は宿で済ませて直行します（当初入れていたジェフ泡瀬店は、そのぶん外しました）。</p>
           </div>
         </li>
-        <li class="leg"><span>車 22分 / 約13km（県道16号 → 国道329号）</span></li>
+        <li class="leg"><span>車 35分 / 約21km（県道16号 → 国道329号）</span></li>
         <li class="stop">
-          <div class="when"><span class="time">08:22</span><span class="dur">38分</span></div>
-          <div class="card">
-            <div class="card-head"><h3>ジェフ泡瀬店</h3><span class="chip">グルメ</span></div>
-            <p>Otsu の希望枠。沖縄発のファストフード「ジェフ」の2026年7月オープン店。ぬーやるバーガーとゴーヤーリングが看板です。</p>
-            <p><strong>土日祝は7:00から</strong>開いています（平日は9:00〜、通し23:00まで）。10/11は日曜なので問題なし。石川から勝連へ南下する途中のほぼ直線上にあり、<strong>寄り道コストは11分だけ</strong>（直行24分 → 経由35分）。<strong>ココガーデンは朝食付き</strong>なので、ここは軽く摘む程度にするか、宿の朝食を控えめに。住所は店名と違って沖縄市<strong>高原</strong>6-4-21です。</p>
-            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.320260,127.827465" target="_blank" rel="noopener">Google マップ ↗</a><a class="pin" href="https://jefokinawa.co.jp/store-info/" target="_blank" rel="noopener">店舗情報 ↗</a><span class="coord">26.320260, 127.827465</span></div>
-            <details class="spotmap"><summary>地図を表示</summary>
-              <div class="mapframe"><iframe title="ジェフ泡瀬店の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.320260,127.827465"></iframe></div>
-            </details>
-          </div>
-        </li>
-        <li class="leg"><span>車 13分 / 約8km</span></li>
-        <li class="stop">
-          <div class="when"><span class="time">09:15</span><span class="dur">55分</span></div>
+          <div class="when"><span class="time">09:05</span><span class="dur">55分</span></div>
           <div class="card">
             <div class="card-head"><h3>勝連城跡（あまわりパーク）</h3><span class="chip">世界遺産</span><span class="chip sea">絶景</span></div>
             <p>海に突き出した勝連半島の丘に、四つの曲輪が階段状に連なるグスク。最上部の一の曲輪からは金武湾と海中道路が一望でき、<strong>この後に渡る道が上から見える</strong>のが気持ちいい。併設の「あまわりパーク」歴史文化施設に、阿麻和利をVR・シアターで見せる展示があります。</p>
+            <p class="hours"><strong>年中無休</strong>／9:00〜18:00（最終受付 17:30）</p>
             <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.330879,127.881008" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.330879, 127.881008</span></div>
             <details class="spotmap"><summary>地図を表示</summary>
               <div class="mapframe"><iframe title="勝連城跡の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.330879,127.881008"></iframe></div>
@@ -677,10 +667,11 @@
         </li>
         <li class="leg"><span>車 35分 / 約15km（海中道路 → 平安座島 → 宮城島）</span></li>
         <li class="stop">
-          <div class="when"><span class="time">10:45</span><span class="dur">60分</span></div>
+          <div class="when"><span class="time">10:20</span><span class="dur">60分</span></div>
           <div class="card">
             <div class="card-head"><h3>果報バンタ（ぬちまーす観光製塩ファクトリー）</h3><span class="chip sea">絶景</span></div>
             <p>宮城島の断崖から、真下のコバルトの海を見下ろす展望台。「果報（かふう）」＝幸せの崖。製塩ファクトリー敷地の奥にあり、<strong>工場見学は無料・9:00〜17:30（無料ガイド最終16:40）</strong>。塩ソフトとぬちまーすの土産が買えます。展望台までは駐車場から徒歩5分ほど。</p>
+            <p class="hours"><strong>工場見学・ショップ 9:00〜17:30</strong>（無料ガイド最終16:40）／カフェ 10:00〜17:30</p>
             <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.360843,127.992234" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.360843, 127.992234</span></div>
             <details class="spotmap"><summary>地図を表示</summary>
               <div class="mapframe"><iframe title="果報バンタの地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.360843,127.992234"></iframe></div>
@@ -689,19 +680,34 @@
         </li>
         <li class="leg"><span>車 20分 / 約8km（来た道を戻る）</span></li>
         <li class="stop">
-          <div class="when"><span class="time">12:05</span><span class="dur">60分</span></div>
+          <div class="when"><span class="time">11:40</span><span class="dur">60分</span></div>
           <div class="card">
             <div class="card-head"><h3>海中道路・海の駅あやはし館（昼食）</h3><span class="chip sea">絶景</span><span class="chip">グルメ</span></div>
             <p>全長約4.7kmの、海の上をまっすぐ走る道。中間の人工島に「海の駅あやはし館」があり、食堂・土産・展望デッキが揃っています。<strong>干潮時は両側が干潟になって道が海に浮いて見える</strong>ので、潮位表を見ておくと当たりを引けます。</p>
+            <p class="hours"><strong>年中無休</strong>／9:00〜17:30（レストランは11:00〜）</p>
             <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.335858,127.939774" target="_blank" rel="noopener">Google マップ ↗</a><span class="coord">26.335858, 127.939774</span></div>
             <details class="spotmap"><summary>地図を表示</summary>
               <div class="mapframe"><iframe title="海中道路の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=14&amp;q=26.335858,127.939774"></iframe></div>
             </details>
           </div>
         </li>
-        <li class="leg"><span>車 55分 / 約35km（沖縄自動車道 沖縄北IC〜那覇IC）</span></li>
+        <li class="leg"><span>車 30分 / 約20km（国道329号 → 北中城）</span></li>
         <li class="stop">
-          <div class="when"><span class="time">14:00</span><span class="dur">60分</span></div>
+          <div class="when"><span class="time">13:10</span><span class="dur">40分</span></div>
+          <div class="card">
+            <div class="card-head"><h3>中村家住宅</h3><span class="chip">重要文化財</span><span class="chip">最優先</span></div>
+            <p>18世紀中頃の豪農屋敷がほぼ完全な形で残る国指定重要文化財。赤瓦・ヒンプン・高倉・石垣がひと通り揃っていて、沖縄の伝統住居を理解するならここが一番早い。縁側でさんぴん茶が飲めます。</p>
+            <p><strong>当初はDay1に入れていましたが、水曜・木曜が休館</strong>のため初日（木）は閉まっています。海中道路から那覇へ戻る経路上にあるので、寄り道はほぼ発生しません。</p>
+            <p class="hours"><strong>水曜・木曜 休館</strong>／9:00〜17:00（最終入場 16:40）・大人500円</p>
+            <div class="card-foot"><a class="pin" href="https://www.google.com/maps/search/?api=1&amp;query=26.289878,127.800643" target="_blank" rel="noopener">Google マップ ↗</a><a class="pin" href="https://www.nakamurahouse.jp/" target="_blank" rel="noopener">公式サイト ↗</a><span class="coord">26.289878, 127.800643</span></div>
+            <details class="spotmap"><summary>地図を表示</summary>
+              <div class="mapframe"><iframe title="中村家住宅の地図" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&amp;hl=ja&amp;z=16&amp;q=26.289878,127.800643"></iframe></div>
+            </details>
+          </div>
+        </li>
+        <li class="leg"><span>車 45分 / 約20km（沖縄自動車道 北中城IC〜那覇IC）</span></li>
+        <li class="stop">
+          <div class="when"><span class="time">14:35</span><span class="dur">60分</span></div>
           <div class="card">
             <div class="card-head"><h3>沖縄県立博物館・美術館（おきみゅー）</h3><span class="chip">博物館</span></div>
             <p>Runto の希望枠。那覇市おもろまち。<strong>うるまから南下すると国際通りより手前</strong>にあるので、先にここを回ってから国際通りに出ます。</p>
@@ -714,7 +720,7 @@
         </li>
         <li class="leg"><span>車 10分 / 約2km（おもろまち → 牧志）</span></li>
         <li class="stop">
-          <div class="when"><span class="time">15:10</span><span class="dur">100分</span></div>
+          <div class="when"><span class="time">15:45</span><span class="dur">70分</span></div>
           <div class="card">
             <div class="card-head"><h3>国際通り・第一牧志公設市場</h3><span class="chip">買い物</span></div>
             <p>土産の総仕上げ。市場2階の食堂で1階の魚を調理してもらう「持ち上げ」もできます。読谷を見送ったぶん、器が欲しければ市場から徒歩5分の<strong>壺屋やちむん通り</strong>（26.212909, 127.691808）へ。周辺は駐車場探しに時間を取られるので、その分も見込んだ数字です。<strong>おきみゅーを入れたぶん、前案の140分から100分に縮めています。</strong></p>
@@ -838,10 +844,10 @@
         </thead>
         <tbody>
           <tr><td class="num">Day1</td><td class="name">那覇空港</td><td>発着</td><td class="num">26.206400</td><td class="num">127.646700</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.206400,127.646700" target="_blank" rel="noopener">開く ↗</a></td></tr>
+          <tr><td class="num">Day1</td><td class="name">金城町石畳道</td><td>史跡</td><td class="num">26.213889</td><td class="num">127.717500</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.320260,127.827465" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day1</td><td class="name">玉陵</td><td>世界遺産</td><td class="num">26.218317</td><td class="num">127.714748</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.218317,127.714748" target="_blank" rel="noopener">開く ↗</a></td></tr>
-          <tr><td class="num">Day1</td><td class="name">中村家住宅</td><td>重要文化財</td><td class="num">26.289878</td><td class="num">127.800643</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.289878,127.800643" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day1</td><td class="name">中城城跡</td><td>世界遺産</td><td class="num">26.283934</td><td class="num">127.801160</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.283934,127.801160" target="_blank" rel="noopener">開く ↗</a></td></tr>
-          <tr><td class="num">Day1</td><td class="name">美浜アメリカンビレッジ</td><td>グルメ・買物</td><td class="num">26.315700</td><td class="num">127.756300</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.315700,127.756300" target="_blank" rel="noopener">開く ↗</a></td></tr>
+          <tr><td class="num">Day1</td><td class="name">美浜アメリカンビレッジ</td><td>任意（ホテルから車15分）</td><td class="num">26.315700</td><td class="num">127.756300</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.315700,127.756300" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day1</td><td class="name">ラグナガーデンホテル</td><td>宿泊</td><td class="num">26.280555</td><td class="num">127.738276</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.280555,127.738276" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day2</td><td class="name">トロピカルビーチ</td><td>ビーチ</td><td class="num">26.281438</td><td class="num">127.731813</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.281438,127.731813" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day2</td><td class="name">琉球村</td><td>体験・文化</td><td class="num">26.429469</td><td class="num">127.775259</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.429469,127.775259" target="_blank" rel="noopener">開く ↗</a></td></tr>
@@ -856,10 +862,10 @@
           <tr><td class="num">Day3</td><td class="name">宮里そば</td><td>グルメ</td><td class="num">26.593978</td><td class="num">127.970714</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.593978,127.970714" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day3</td><td class="name">東村ふれあいヒルギ公園</td><td>アクティビティ</td><td class="num">26.603985</td><td class="num">128.144838</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.603985,128.144838" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day3</td><td class="name">ココガーデンリゾートオキナワ</td><td>宿泊</td><td class="num">26.420203</td><td class="num">127.819982</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.420203,127.819982" target="_blank" rel="noopener">開く ↗</a></td></tr>
-          <tr><td class="num">Day4</td><td class="name">ジェフ泡瀬店</td><td>グルメ</td><td class="num">26.320260</td><td class="num">127.827465</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.320260,127.827465" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day4</td><td class="name">勝連城跡（あまわりパーク）</td><td>世界遺産</td><td class="num">26.330879</td><td class="num">127.881008</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.330879,127.881008" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day4</td><td class="name">果報バンタ（ぬちまーす）</td><td>絶景</td><td class="num">26.360843</td><td class="num">127.992234</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.360843,127.992234" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day4</td><td class="name">海中道路・海の駅あやはし館</td><td>絶景・グルメ</td><td class="num">26.335858</td><td class="num">127.939774</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.335858,127.939774" target="_blank" rel="noopener">開く ↗</a></td></tr>
+          <tr><td class="num">Day4</td><td class="name">中村家住宅</td><td>重要文化財</td><td class="num">26.289878</td><td class="num">127.800643</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.289878,127.800643" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day4</td><td class="name">沖縄県立博物館・美術館（おきみゅー）</td><td>博物館</td><td class="num">26.227314</td><td class="num">127.693849</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.227314,127.693849" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day4</td><td class="name">国際通り</td><td>買い物</td><td class="num">26.214800</td><td class="num">127.689300</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.214800,127.689300" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">Day4</td><td class="name">第一牧志公設市場</td><td>買い物</td><td class="num">26.214400</td><td class="num">127.690500</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.214400,127.690500" target="_blank" rel="noopener">開く ↗</a></td></tr>
@@ -867,14 +873,13 @@
           <tr><td class="num">Day4</td><td class="name">A&amp;W 那覇空港店</td><td>グルメ</td><td class="num">26.206400</td><td class="num">127.646700</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.206400,127.646700" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">予備</td><td class="name">今帰仁城跡</td><td>差し替え候補</td><td class="num">26.692208</td><td class="num">127.927919</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.692208,127.927919" target="_blank" rel="noopener">開く ↗</a></td></tr>
           <tr><td class="num">予備</td><td class="name">沖縄美ら海水族館</td><td>差し替え候補</td><td class="num">26.694400</td><td class="num">127.877900</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.694400,127.877900" target="_blank" rel="noopener">開く ↗</a></td></tr>
-          <tr><td class="num">予備</td><td class="name">瀬長島ウミカジテラス</td><td>差し替え候補</td><td class="num">26.178000</td><td class="num">127.644400</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.178000,127.644400" target="_blank" rel="noopener">開く ↗</a></td></tr>
-        </tbody>
+          <tr><td class="num">予備</td><td class="name">瀬長島ウミカジテラス</td><td>差し替え候補</td><td class="num">26.178000</td><td class="num">127.644400</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=26.178000,127.644400" target="_blank" rel="noopener">開く ↗</a></td></tr></tbody>
       </table>
     </div>
   </section>
 
   <footer>
-    <p><strong>座標について</strong>／玉陵・中村家住宅・琉球村・古宇利島・東村ふれあいヒルギ公園は共有された地図リンクから取得した正確な値。ラグナガーデンホテル・isola base kouri・ココガーデンリゾートオキナワ・トロピカルビーチ・エメラルドビーチ・宮里そば・おきみゅー・ジェフ泡瀬店は Google マップの施設ピンの値。中城城跡・今帰仁城跡・勝連城跡・果報バンタ・海中道路・ブセナ海中公園・備瀬のフクギ並木・壺屋やちむん通りは OpenStreetMap で照合した値。その他は施設の代表点（誤差数十〜百m程度）です。飲食店は休業日が変わるため、地図リンクは店名検索にしてあります。</p>
+    <p><strong>座標について</strong>／玉陵・中村家住宅・琉球村・古宇利島・東村ふれあいヒルギ公園は共有された地図リンクから取得した正確な値。ラグナガーデンホテル・isola base kouri・ココガーデンリゾートオキナワ・トロピカルビーチ・エメラルドビーチ・宮里そば・おきみゅーは Google マップの施設ピンの値。金城町石畳道は坂の中ほどの代表点。中城城跡・今帰仁城跡・勝連城跡・果報バンタ・海中道路・ブセナ海中公園・備瀬のフクギ並木・壺屋やちむん通りは OpenStreetMap で照合した値。その他は施設の代表点（誤差数十〜百m程度）です。飲食店は休業日が変わるため、地図リンクは店名検索にしてあります。</p>
     <p style="margin-top:8px">営業時間・料金・宿泊料金は変動します。予約前に各公式サイトで最終確認をお願いします。埋め込み地図は Google マップを読み込むため、オフラインでは表示されません。</p>
   </footer>
 </div>
