@@ -115,6 +115,43 @@
   .alert strong{color:var(--bin)}
 
   .day{margin-bottom:54px}
+  /* 日ごとに畳めるようにする。終わった日を閉じておくと、残りが見やすい */
+  .day > summary{cursor:pointer;list-style:none;position:relative;padding-right:30px}
+  .day > summary::-webkit-details-marker{display:none}
+  /* 見出しが折り返しても矢印だけ下に落ちないよう、右上に固定する */
+  .chev{position:absolute;right:6px;top:20px;width:10px;height:10px;
+    border-right:2px solid var(--ai);border-bottom:2px solid var(--ai);
+    transform:rotate(45deg);transition:transform .15s ease}
+  .day[open] > summary .chev{transform:rotate(-135deg)}
+  .day:not([open]) > summary{opacity:.72}
+  .day:not([open]) > summary:hover{opacity:1}
+  .routeline{margin:14px 0 0}
+
+  /* ---- 目次 ---- */
+  .toc{background:var(--surface);border:1px solid var(--line);border-radius:3px;
+    padding:16px 18px;margin:0 0 34px;box-shadow:var(--shadow)}
+  .toc h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .toc .allbtn{margin-left:auto;display:flex;gap:7px}
+  .toc button{margin-top:0;min-height:0;padding:5px 11px;font-size:11.5px;font-weight:400;
+    background:transparent;color:var(--umi);border:1px solid var(--umi);border-radius:2px}
+  .toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+  .toc li{display:flex;align-items:baseline;gap:10px;padding:7px 0;
+    border-bottom:1px solid var(--line-soft)}
+  .toc li:last-child{border-bottom:none}
+  .toc a{text-decoration:none;color:var(--text);font-weight:600;font-size:14px;flex:none}
+  .toc a:hover{color:var(--umi)}
+  .toc .tday{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;
+    color:var(--surface);background:var(--ai);padding:2px 7px;border-radius:2px;flex:none}
+  .toc .tsum{color:var(--muted);font-size:12px;flex:1 1 auto;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .toc .tsub{margin-top:11px;padding-top:11px;border-top:1px solid var(--line);
+    display:flex;flex-wrap:wrap;gap:8px 16px}
+  .toc .tsub a{font-weight:400;font-size:12.5px;color:var(--umi)}
+  @media (max-width:560px){
+    .toc .tsum{flex:1 1 100%;white-space:normal}
+    .toc li{flex-wrap:wrap}
+  }
+  @media print{.toc,.chev{display:none}.day:not([open]) > summary{opacity:1}}
   .day-head{position:sticky;top:0;z-index:5;background:var(--ground);
     padding:12px 0 10px;border-bottom:2px solid var(--ai);
     box-shadow:0 2px 0 var(--kin-line);
@@ -294,13 +331,37 @@
   <p class="alert"><span><strong>10/10（土）〜10/12（月）は3連休。</strong>10/12がスポーツの日です。宿3泊とレンタカーは予約済み。<strong>残るはカヤック（10/10 集合14:30の午後枠）と、10/09 古宇利島・10/10 ココガーデンの夕食</strong>の3つです。復路 10/11（日）夕方の那覇空港も混みます。レンタカーは<strong>10/11 17:30が契約上の返却期限</strong>なので、17:15着を目標に。</span></p>
 
   <!-- ═════════ DAY 1 ═════════ -->
-  <section class="day">
-    <div class="day-head">
+  <nav class="toc" aria-label="目次">
+    <h2>目次
+      <span class="allbtn">
+        <button type="button" id="toc-open">すべて開く</button>
+        <button type="button" id="toc-close">すべて閉じる</button>
+      </span>
+    </h2>
+    <ol>
+      <li><span class="tday">DAY 1</span><a href="#day1">10/08 木</a><span class="tsum">首里の石畳と王陵 → おきみゅー → 宜野湾で夕食</span></li>
+      <li><span class="tday">DAY 2</span><a href="#day2">10/09 金</a><span class="tsum">琉球村 → 万座毛 → ブセナ → 古宇利島を一周</span></li>
+      <li><span class="tday">DAY 3</span><a href="#day3">10/10 土</a><span class="tsum">LoFoLoで朝食 → 本部半島 → マングローブカヤック</span></li>
+      <li><span class="tday">DAY 4</span><a href="#day4">10/11 日</a><span class="tsum">勝連城跡 → 海中道路 → 中城城跡 → 中村家住宅</span></li>
+    </ol>
+    <p class="tsub">
+      <a href="#kento">検討したもの</a>
+      <a href="#yado">宿</a>
+      <a href="#osaeru">先に押さえるもの</a>
+      <a href="#mymap">マイマップ</a>
+      <a href="wishlist.html">行きたいスポットの集計</a>
+      <a href="mochimono.html">持ち物</a>
+      <a href="seisan.html">立替・精算</a>
+    </p>
+  </nav>
+
+  <details class="day" id="day1" open>
+    <summary class="day-head">
       <span class="day-no">DAY 1</span>
       <span class="day-date">10/08 木</span>
       <span class="day-theme">首里の石畳と王陵 → おきみゅーで予習 → 宜野湾で早めに休んで夕食</span>
-      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.2064,127.6467&amp;destination=26.280555,127.738276&amp;waypoints=26.213889,127.717500%7C26.218317,127.714748%7C26.227314,127.693849&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
-    </div>
+    <span class="chev" aria-hidden="true"></span></summary>
+    <p class="routeline"><a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.2064,127.6467&amp;destination=26.280555,127.738276&amp;waypoints=26.213889,127.717500%7C26.218317,127.714748%7C26.227314,127.693849&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a></p>
 
     <div class="mapframe daymap">
       <iframe title="Day 1 のルート" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
@@ -411,16 +472,16 @@
         </div>
       </li>
     </ol>
-  </section>
+  </details>
 
   <!-- ═════════ DAY 2 ═════════ -->
-  <section class="day">
-    <div class="day-head">
+  <details class="day" id="day2" open>
+    <summary class="day-head">
       <span class="day-no">DAY 2</span>
       <span class="day-date">10/09 金</span>
       <span class="day-theme">琉球村 → 万座毛 → ブセナ → 古宇利島を一周して泊まる</span>
-      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.280555,127.738276&amp;destination=26.711901,128.015677&amp;waypoints=26.429469,127.775259%7C26.5048,127.8497%7C26.539819,127.935858%7C26.593978,127.970714%7C26.694528,128.020946%7C26.700129,128.024161&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
-    </div>
+    <span class="chev" aria-hidden="true"></span></summary>
+    <p class="routeline"><a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.280555,127.738276&amp;destination=26.711901,128.015677&amp;waypoints=26.429469,127.775259%7C26.5048,127.8497%7C26.539819,127.935858%7C26.593978,127.970714%7C26.694528,128.020946%7C26.700129,128.024161&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a></p>
 
     <div class="mapframe daymap">
       <iframe title="Day 2 のルート" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
@@ -579,16 +640,16 @@
       </li>
       <li class="swap"><b>時間が余ったら／差し替え候補</b><strong>今帰仁城跡</strong>（26.692208, 127.927919）は古宇利から車25分、閉門18:00・最終入場17:30。夕方の斜光で城壁がきれいです。雨なら<strong>沖縄美ら海水族館</strong>（26.6944, 127.8779／閉館18:30・最終入館17:30）に振り替え。</li>
     </ol>
-  </section>
+  </details>
 
   <!-- ═════════ DAY 3 ═════════ -->
-  <section class="day">
-    <div class="day-head">
+  <details class="day" id="day3" open>
+    <summary class="day-head">
       <span class="day-no">DAY 3</span>
       <span class="day-date">10/10 土</span>
       <span class="day-theme">LoFoLoで朝食 → 本部半島の海と並木 → 午後はマングローブカヤック</span>
-      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.711901,128.015677&amp;destination=26.420203,127.819982&amp;waypoints=26.699183,127.877590%7C26.7007,127.8773%7C26.593978,127.970714%7C26.603985,128.144838&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
-    </div>
+    <span class="chev" aria-hidden="true"></span></summary>
+    <p class="routeline"><a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.711901,128.015677&amp;destination=26.420203,127.819982&amp;waypoints=26.699183,127.877590%7C26.7007,127.8773%7C26.593978,127.970714%7C26.603985,128.144838&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a></p>
 
     <div class="mapframe daymap">
       <iframe title="Day 3 のルート" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
@@ -682,16 +743,16 @@
       </li>
       <li class="swap"><b>バッファの使い道</b>宮里そばが空いていて13:30に東村へ着いた場合、1時間手持ち無沙汰になります。備瀬から名護へ向かう途中に<strong>今帰仁城跡</strong>（26.692208, 127.927919／フクギ並木から約20分）を挟むと、ちょうど埋まります。雨なら午前を<strong>沖縄美ら海水族館</strong>（26.6944, 127.8779）に振り替え——エメラルドビーチと同じ海洋博公園内なので移動ゼロです。</li>
     </ol>
-  </section>
+  </details>
 
   <!-- ═════════ DAY 4 ═════════ -->
-  <section class="day">
-    <div class="day-head">
+  <details class="day" id="day4" open>
+    <summary class="day-head">
       <span class="day-no">DAY 4</span>
       <span class="day-date">10/11 日</span>
       <span class="day-theme">勝連城跡 → 海中道路 → 中城城跡 → 中村家住宅 → 19:00発</span>
-      <a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.420203,127.819982&amp;destination=26.2064,127.6467&amp;waypoints=26.330879,127.881008%7C26.360843,127.992234%7C26.335858,127.939774%7C26.283934,127.801160%7C26.289878,127.693849%7C26.2148,127.6893&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a>
-    </div>
+    <span class="chev" aria-hidden="true"></span></summary>
+    <p class="routeline"><a class="route-btn" href="https://www.google.com/maps/dir/?api=1&amp;origin=26.420203,127.819982&amp;destination=26.2064,127.6467&amp;waypoints=26.330879,127.881008%7C26.360843,127.992234%7C26.335858,127.939774%7C26.283934,127.801160%7C26.289878,127.693849%7C26.2148,127.6893&amp;travelmode=driving" target="_blank" rel="noopener">Google マップで開く ↗</a></p>
 
     <div class="mapframe daymap">
       <iframe title="Day 4 のルート" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
@@ -806,10 +867,10 @@
         </li>
         <li class="swap"><b>時間が余ったら</b><strong>瀬長島ウミカジテラス</strong>（26.1780, 127.6444）。空港から車10分、飛行機が真上を通る白い階段状のテラス。返却前に30〜40分だけ寄れます。国際通りを短めに切り上げるなら、こちらに回すのもあり。</li>
       </ol>
-  </section>
+  </details>
 
   <!-- ═════════ 検討結果 ═════════ -->
-  <section class="block">
+  <section class="block" id="kento">
     <p class="eyebrow">Feasibility</p>
     <h2>検討したもの</h2>
     <p class="lede">候補に挙がったうち、入れなかった／入れ替えたものの理由。</p>
@@ -842,7 +903,7 @@
   </section>
 
   <!-- ═════════ 宿 ═════════ -->
-  <section class="block">
+  <section class="block" id="yado">
     <p class="eyebrow">Accommodation</p>
     <h2>宿（3泊とも予約済）</h2>
     <p class="lede">3泊とも別の宿になりますが、荷物は車に積みっぱなしで動けます。<strong>3泊合計 36,692円／名。</strong>金額は3名1室（古宇利島は3名で一棟）での1名あたりです。3泊とも予約済みなので、あとは10/09の買い出しと10/10の夕食だけ段取りしておけば宿まわりは完了です。</p>
@@ -863,7 +924,7 @@
   </section>
 
   <!-- ═════════ 予約 ═════════ -->
-  <section class="block">
+  <section class="block" id="osaeru">
     <p class="eyebrow">Before you go</p>
     <h2>先に押さえるもの</h2>
     <ul class="checks">
@@ -878,7 +939,7 @@
   </section>
 
   <!-- ═════════ マイマップ ═════════ -->
-  <section class="block">
+  <section class="block" id="mymap">
     <p class="eyebrow">Share with the group</p>
     <h2>Google マイマップへの取り込み</h2>
     <p class="lede">下の CSV を読み込めば、全31スポットが1枚の地図にピン留めされ、3人で共有・編集できます。</p>
@@ -942,5 +1003,47 @@
     <p style="margin-top:8px">営業時間・料金・宿泊料金は変動します。予約前に各公式サイトで最終確認をお願いします。埋め込み地図は Google マップを読み込むため、オフラインでは表示されません。</p>
   </footer>
 </div>
+<script>
+(function(){
+  "use strict";
+  var KEY = "okinawa2026.days";          // { day1:false, ... } 閉じた日だけ憶える
+  var days = [].slice.call(document.querySelectorAll("details.day"));
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+  function save(v){ try{ localStorage.setItem(KEY, JSON.stringify(v)); }catch(e){} }
+
+  var state = load();
+  days.forEach(function(d){ if(state[d.id] === false) d.open = false; });
+
+  days.forEach(function(d){
+    d.addEventListener("toggle", function(){
+      var st = load(); st[d.id] = d.open; save(st);
+    });
+  });
+
+  function setAll(open){
+    var st = load();
+    days.forEach(function(d){ d.open = open; st[d.id] = open; });
+    save(st);
+  }
+  document.getElementById("toc-open").addEventListener("click", function(){ setAll(true); });
+  document.getElementById("toc-close").addEventListener("click", function(){ setAll(false); });
+
+  // 目次から飛ぶとき、閉じている日は開いてから移動する
+  function openTarget(hash){
+    if(!hash) return;
+    var el = document.querySelector(hash);
+    if(el && el.tagName === "DETAILS" && !el.open) el.open = true;
+  }
+  document.querySelectorAll('.toc a[href^="#"]').forEach(function(a){
+    a.addEventListener("click", function(){ openTarget(a.getAttribute("href")); });
+  });
+  window.addEventListener("hashchange", function(){ openTarget(location.hash); });
+  openTarget(location.hash);
+
+  // 印刷時は中身が要るので、いったん全部開く
+  window.addEventListener("beforeprint", function(){ days.forEach(function(d){ d.open = true; }); });
+})();
+</script>
 </body>
 </html>
